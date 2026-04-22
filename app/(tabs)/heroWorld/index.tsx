@@ -101,7 +101,10 @@ export default function HeroWorldScreen() {
         </View>
 
         {/* Daily Challenge */}
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => router.push('/(tabs)/heroWorld/daily-challenge' as any)}
+        >
           <Text style={{
             fontSize: 32,
             padding: Spacing.md,

@@ -9,6 +9,7 @@ class DailyChallengeTask(BaseModel):
     id: int = Field(..., description="Unique task identifier")
     task_name: str = Field(..., description="Display title of the challenge")
     tips: str = Field(..., description="Short user-facing tip")
+    image_url: str | None = Field(None, description="URL or path to challenge image")
 
     class Config:
         json_schema_extra = {
@@ -16,6 +17,7 @@ class DailyChallengeTask(BaseModel):
                 "id": 1,
                 "task_name": "Strong Bone Milk",
                 "tips": "Drink your milk today!",
+                "image_url": "/assets/images/strong_Bone_Milk.png",
             }
         }
 

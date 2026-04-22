@@ -49,7 +49,12 @@ async def get_next_challenge(
         )
 
     logger.info("Selected daily challenge id=%s exclude_id=%s", task.id, exclude_id)
-    return DailyChallengeTask(id=task.id, task_name=task.task_name, tips=task.tips)
+    return DailyChallengeTask(
+        id=task.id,
+        task_name=task.task_name,
+        tips=task.tips,
+        image_url=task.image_url,
+    )
 
 
 @router.post("/complete", response_model=DailyChallengeCompleteResponse, summary="Complete daily challenge")

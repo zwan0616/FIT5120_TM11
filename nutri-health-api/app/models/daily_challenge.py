@@ -14,3 +14,4 @@ class DailyHealthyChallenge(Base):
     task_name = Column(String(128), nullable=False, unique=True)
     tips = Column(Text, nullable=False)
     feedback = Column(Text, nullable=False)
+    image_url = Column(String(256), nullable=True)
