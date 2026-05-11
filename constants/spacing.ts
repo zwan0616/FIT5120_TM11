@@ -15,6 +15,7 @@ export const Spacing = {
   base: 16,   // 1rem
   lg: 20,     // 1.25rem
   xl: 24,     // 1.5rem
+  xxl: 32,    // 2rem
   
   // Macro spacing
   '2xl': 32,  // 2rem

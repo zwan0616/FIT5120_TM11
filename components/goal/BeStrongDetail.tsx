@@ -9,9 +9,10 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { ArrowRight, Star, ArrowLeft } from 'lucide-react-native';
+import { ArrowRight, Star, ArrowLeft, Map } from 'lucide-react-native';
 import type { Goal } from './types';
 import type { RecommendationResponse } from '../../services/recommendations';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +24,16 @@ interface Props {
 }
 
 export default function BeStrongDetail({ goal, onBack, recommendations, recLoading }: Props) {
+  const router = useRouter();
+  
+  const handleFoodQuestPress = (foodName: string) => {
+    // Navigate to food quest map with the food name
+    router.push({
+      pathname: '/food-quest-map' as any,
+      params: { foodName },
+    });
+  };
+
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
     description: `Grade ${f.grade}`,
@@ -62,7 +73,11 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
         ) : (
           <View style={styles.grid}>
             {/* Main Card */}
-            <View style={styles.mainCard}>
+            <TouchableOpacity 
+              style={styles.mainCard}
+              onPress={() => handleFoodQuestPress(sf0.name)}
+              activeOpacity={0.7}
+            >
               <View style={styles.cardHeader}>
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>GOOD CHOICE</Text>
@@ -73,23 +88,43 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
                 <Image source={{ uri: sf0.image }} style={styles.mainImage} resizeMode="cover" />
               </View>
               <Text style={styles.descriptionText}>{sf0.description}</Text>
-            </View>
+              <View style={styles.questButton}>
+                <Map color="#2E7D32" size={16} />
+                <Text style={styles.questButtonText}>Find This Food</Text>
+              </View>
+            </TouchableOpacity>
 
             {/* Row of smaller cards */}
             <View style={styles.row}>
-              <View style={styles.smallCard}>
+              <TouchableOpacity 
+                style={styles.smallCard}
+                onPress={() => handleFoodQuestPress(sf1.name)}
+                activeOpacity={0.7}
+              >
                 <View style={styles.smallImageContainer}>
                   <Image source={{ uri: sf1.image }} style={styles.smallImage} resizeMode="contain" />
                 </View>
                 <Text style={styles.foodNameSmall}>{sf1.name}</Text>
-              </View>
+                <View style={styles.questButtonSmall}>
+                  <Map color="#2E7D32" size={14} />
+                  <Text style={styles.questButtonTextSmall}>Find This Food</Text>
+                </View>
+              </TouchableOpacity>
 
-              <View style={styles.smallCard}>
+              <TouchableOpacity 
+                style={styles.smallCard}
+                onPress={() => handleFoodQuestPress(sf2.name)}
+                activeOpacity={0.7}
+              >
                 <View style={styles.smallImageContainer}>
                   <Image source={{ uri: sf2.image }} style={styles.smallImage} resizeMode="contain" />
                 </View>
                 <Text style={styles.foodNameSmall}>{sf2.name}</Text>
-              </View>
+                <View style={styles.questButtonSmall}>
+                  <Map color="#2E7D32" size={14} />
+                  <Text style={styles.questButtonTextSmall}>Find This Food</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -405,5 +440,39 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 24,
+  },
+  questButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  questButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2E7D32',
+  },
+  questButtonSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+    alignSelf: 'center',
+  },
+  questButtonTextSmall: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#2E7D32',
   },
 });
