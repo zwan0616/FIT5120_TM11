@@ -45,7 +45,7 @@ def _normalize_label(value: str) -> str:
 
 def _looks_like_non_food(*labels: str) -> bool:
     for raw in labels:
-        label = _normalize_label(raw)
+        label = _normalize_label(raw).split()
         if not label:
             continue
         for bad_term in NON_FOOD_TERMS:
