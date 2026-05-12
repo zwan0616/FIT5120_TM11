@@ -12,7 +12,7 @@ import {
   ShieldPlus,
   Smile
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Dimensions,
   ScrollView,
@@ -31,6 +31,7 @@ import ThinkFastDetail from '../../components/goal/ThinkFastDetail';
 import type { Alternative, Goal, SuperFood, TryLess } from '../../components/goal/types';
 import { getUserProfile } from '../../services/userProfile';
 import { getRecommendations, type RecommendationResponse } from '../../services/recommendations';
+import MapModal from '../../components/map/MapModal';
 
 // Re-export types for backward compatibility with imports like `import { Goal } from '../types'`
 export type { Alternative, Goal, SuperFood, TryLess };
@@ -190,6 +191,13 @@ export default function GoalScreen() {
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationResponse | null>(null);
   const [recLoading, setRecLoading] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
+  const [mapFoodItem, setMapFoodItem] = useState<string | null>(null);
+
+  const handleFoodPress = useCallback((foodName: string) => {
+    setMapFoodItem(foodName);
+    setMapVisible(true);
+  }, []);
 
   const selectedGoal = GOALS.find(g => g.id === selectedGoalId);
 
@@ -287,6 +295,7 @@ export default function GoalScreen() {
       onBack: () => setSelectedGoalId(null),
       recommendations,
       recLoading,
+      onFoodPress: handleFoodPress,
     };
 
     switch (selectedGoal.id) {
@@ -328,7 +337,12 @@ export default function GoalScreen() {
         {selectedGoalId ? renderGoalDetail() : renderGoalList()}
 
       </ScrollView>
-      
+
+      <MapModal
+        visible={mapVisible}
+        foodItem={mapFoodItem}
+        onClose={() => setMapVisible(false)}
+      />
     </View>
   );
 }

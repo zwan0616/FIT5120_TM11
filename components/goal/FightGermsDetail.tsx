@@ -20,9 +20,10 @@ interface Props {
   onBack?: () => void;
   recommendations?: RecommendationResponse | null;
   recLoading?: boolean;
+  onFoodPress?: (foodName: string) => void;
 }
 
-export default function FightGermsDetail({ goal, onBack, recommendations, recLoading }: Props) {
+export default function FightGermsDetail({ goal, onBack, recommendations, recLoading, onFoodPress }: Props) {
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
     description: `Grade ${f.grade}`,
@@ -61,7 +62,12 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
         ) : (
           <View style={styles.grid}>
             {displaySuperFoods.map((food) => (
-              <View key={food.name} style={styles.foodCard}>
+              <TouchableOpacity
+                key={food.name}
+                style={styles.foodCard}
+                activeOpacity={0.8}
+                onPress={() => onFoodPress?.(food.name)}
+              >
                 <View style={styles.foodInfo}>
                   <Text style={styles.foodName}>{food.name}</Text>
                   <View style={styles.badge}>
@@ -71,7 +77,7 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
                 <View style={styles.foodImageContainer}>
                   <Image source={{ uri: food.image }} style={styles.foodImage} resizeMode="contain" />
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -90,15 +96,20 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
           ) : (
             <View style={styles.grid}>
               {tinyHeroFoods.map((food) => (
-                <View key={food.cn_code} style={[styles.foodCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0' }]}>
+                <TouchableOpacity
+                  key={food.cn_code}
+                  style={[styles.foodCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0' }]}
+                  activeOpacity={0.8}
+                  onPress={() => onFoodPress?.(food.name)}
+                >
                   <View style={styles.foodInfo}>
                     <Text style={styles.foodName}>{food.name}</Text>
-                    <Text style={[styles.goodChoiceText, { color: '#7B1FA2' }]}>Hero Challenge</Text>
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: '#7B1FA2' }}>Hero Challenge</Text>
                   </View>
                   <View style={styles.foodImageContainer}>
                     <Image source={{ uri: food.image_url }} style={styles.foodImage} resizeMode="contain" />
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -121,7 +132,7 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
               <View key={food.cn_code} style={[styles.foodCard, { backgroundColor: '#FFF3E0' }]}>
                 <View style={styles.foodInfo}>
                   <Text style={styles.foodName}>{food.name}</Text>
-                  <Text style={[styles.goodChoiceText, { color: '#BF360C' }]}>Eat Less</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#BF360C' }}>Eat Less</Text>
                 </View>
                 <View style={styles.foodImageContainer}>
                   <Image source={{ uri: food.image_url }} style={[styles.foodImage, { opacity: 0.7 }]} resizeMode="contain" />

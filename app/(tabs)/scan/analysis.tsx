@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { scanFood, ApiError } from '../../../services/api';
 import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
+import MapModal from '../../../components/map/MapModal';
 
 interface RecommendedFood {
   id: string;
@@ -206,11 +207,13 @@ export default function AnalysisScreen() {
     loadAnalysis();
   }, [photoUri]);
 
-  const handleSwap = (food: RecommendedFood) => {
-    // For now, this is a placeholder action.
-    // Later, this can open a detail page or save the healthier option.
-    console.log('Swap selected:', food.name);
-  };
+  const [mapVisible, setMapVisible] = useState(false);
+  const [mapFoodItem, setMapFoodItem] = useState<string | null>(null);
+
+  const handleSwap = useCallback((food: RecommendedFood) => {
+    setMapFoodItem(food.name);
+    setMapVisible(true);
+  }, []);
 
   if (loading) {
     return (
@@ -408,6 +411,11 @@ export default function AnalysisScreen() {
           </View>
         )}
       </View>
+      <MapModal
+        visible={mapVisible}
+        foodItem={mapFoodItem}
+        onClose={() => setMapVisible(false)}
+      />
     </ScrollView>
   );
 }

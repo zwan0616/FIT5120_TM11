@@ -20,9 +20,10 @@ interface Props {
   onBack?: () => void;
   recommendations?: RecommendationResponse | null;
   recLoading?: boolean;
+  onFoodPress?: (foodName: string) => void;
 }
 
-export default function ThinkFastDetail({ goal, onBack, recommendations, recLoading }: Props) {
+export default function ThinkFastDetail({ goal, onBack, recommendations, recLoading, onFoodPress }: Props) {
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
     description: `Grade ${f.grade}`,
@@ -60,7 +61,12 @@ export default function ThinkFastDetail({ goal, onBack, recommendations, recLoad
         ) : (
           <View style={styles.grid}>
             {displaySuperFoods.map((food) => (
-              <View key={food.name} style={styles.foodCard}>
+              <TouchableOpacity
+                key={food.name}
+                style={styles.foodCard}
+                activeOpacity={0.8}
+                onPress={() => onFoodPress?.(food.name)}
+              >
                 <View style={styles.foodImageContainer}>
                   <Image source={{ uri: food.image }} style={styles.foodImage} resizeMode="contain" />
                 </View>
@@ -70,7 +76,7 @@ export default function ThinkFastDetail({ goal, onBack, recommendations, recLoad
                     <Text style={styles.badgeText}>GOOD CHOICE</Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -89,19 +95,22 @@ export default function ThinkFastDetail({ goal, onBack, recommendations, recLoad
           ) : (
             <View style={styles.grid}>
               {tinyHeroFoods.map((food) => (
-                <View key={food.cn_code} style={[styles.foodCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0' }]}>
+                <TouchableOpacity
+                  key={food.cn_code}
+                  style={[styles.foodCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0' }]}
+                  activeOpacity={0.8}
+                  onPress={() => onFoodPress?.(food.name)}
+                >
                   <View style={styles.foodImageContainer}>
                     <Image source={{ uri: food.image_url }} style={styles.foodImage} resizeMode="contain" />
                   </View>
                   <View style={styles.foodInfo}>
-                    <View style={styles.foodTitleRow}>
-                      <Text style={styles.foodName}>{food.name}</Text>
-                    </View>
+                    <Text style={styles.foodName}>{food.name}</Text>
                     <View style={[styles.badge, { backgroundColor: '#F3E5F5' }]}>
                       <Text style={[styles.badgeText, { color: '#7B1FA2' }]}>HERO CHALLENGE</Text>
                     </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}

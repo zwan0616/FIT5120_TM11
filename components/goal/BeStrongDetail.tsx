@@ -20,9 +20,10 @@ interface Props {
   onBack?: () => void;
   recommendations?: RecommendationResponse | null;
   recLoading?: boolean;
+  onFoodPress?: (foodName: string) => void;
 }
 
-export default function BeStrongDetail({ goal, onBack, recommendations, recLoading }: Props) {
+export default function BeStrongDetail({ goal, onBack, recommendations, recLoading, onFoodPress }: Props) {
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
     description: `Grade ${f.grade}`,
@@ -62,7 +63,11 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
         ) : (
           <View style={styles.grid}>
             {/* Main Card */}
-            <View style={styles.mainCard}>
+            <TouchableOpacity
+              style={styles.mainCard}
+              activeOpacity={0.8}
+              onPress={() => onFoodPress?.(sf0.name)}
+            >
               <View style={styles.cardHeader}>
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>GOOD CHOICE</Text>
@@ -73,23 +78,31 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
                 <Image source={{ uri: sf0.image }} style={styles.mainImage} resizeMode="cover" />
               </View>
               <Text style={styles.descriptionText}>{sf0.description}</Text>
-            </View>
+            </TouchableOpacity>
 
             {/* Row of smaller cards */}
             <View style={styles.row}>
-              <View style={styles.smallCard}>
+              <TouchableOpacity
+                style={styles.smallCard}
+                activeOpacity={0.8}
+                onPress={() => onFoodPress?.(sf1.name)}
+              >
                 <View style={styles.smallImageContainer}>
                   <Image source={{ uri: sf1.image }} style={styles.smallImage} resizeMode="contain" />
                 </View>
                 <Text style={styles.foodNameSmall}>{sf1.name}</Text>
-              </View>
+              </TouchableOpacity>
 
-              <View style={styles.smallCard}>
+              <TouchableOpacity
+                style={styles.smallCard}
+                activeOpacity={0.8}
+                onPress={() => onFoodPress?.(sf2.name)}
+              >
                 <View style={styles.smallImageContainer}>
                   <Image source={{ uri: sf2.image }} style={styles.smallImage} resizeMode="contain" />
                 </View>
                 <Text style={styles.foodNameSmall}>{sf2.name}</Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -108,7 +121,12 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
           ) : (
             <View style={styles.grid}>
               {tinyHeroFoods.map((food) => (
-                <View key={food.cn_code} style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0', padding: 16 }]}>
+                <TouchableOpacity
+                  key={food.cn_code}
+                  style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0', padding: 16 }]}
+                  activeOpacity={0.8}
+                  onPress={() => onFoodPress?.(food.name)}
+                >
                   <View style={styles.cardHeader}>
                     <View style={[styles.badge, { backgroundColor: '#9C27B0' }]}>
                       <Text style={styles.badgeText}>HERO CHALLENGE</Text>
@@ -118,7 +136,7 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
                   <View style={[styles.mainImageContainer, { height: 100 }]}>
                     <Image source={{ uri: food.image_url }} style={styles.mainImage} resizeMode="cover" />
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
