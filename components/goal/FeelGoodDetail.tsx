@@ -175,9 +175,9 @@ export default function FeelGoodDetail({ goal, onBack, recommendations, recLoadi
             {tryLessFoods.map((food) => (
               <View key={food.cn_code} style={[styles.tryLessItemCard, { padding: 16 }]}>
                 <Text style={styles.tryLessFoodName}>{food.name}</Text>
-                <View style={[styles.badge, { backgroundColor: '#FFCCBC', marginTop: 8, alignSelf: 'flex-start' }]}>
-                  <Text style={[styles.badgeText, { color: '#BF360C' }]}>EAT LESS</Text>
-                </View>
+                {food.reason && (
+                  <Text style={styles.tryLessExplanation}>{food.reason}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -385,6 +385,14 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#36392c',
     textAlign: 'left',
+  },
+  tryLessExplanation: {
+    fontSize: 14,
+    color: '#BF360C',
+    fontWeight: '600',
+    marginTop: 8,
+    fontStyle: 'italic',
+    lineHeight: 20,
   },
   tryLessCard: {
     backgroundColor: '#fff',

@@ -21,6 +21,7 @@ export interface FoodItem {
   category: string;
   grade: string;
   image_url: string;
+  reason: string;
 }
 
 export interface RecommendationResponse {

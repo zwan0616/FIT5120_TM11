@@ -65,7 +65,7 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
         <Text style={[styles.infoDescriptionText, { color: '#4CAF50', fontStyle: 'italic' }]}>Foods you love that help you reach your goal!</Text>
 
         {recLoading ? (
-          <ActivityIndicator color="#E91E63" size="large" style={ {marginVertical: 24} } />
+          <ActivityIndicator color="#E91E63" size="large" style={{ marginVertical: 24} } />
         ) : (
           <View style={styles.grid}>
             <View style={styles.mainCard}>
@@ -132,7 +132,7 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
           </View>
           <Text style={styles.challengeSubtitle}>Try these healthy foods — your taste buds might surprise you!</Text>
           {recLoading ? (
-            <ActivityIndicator color="#9C27B0" size="large" style={ {marginVertical: 24} } />
+            <ActivityIndicator color="#9C27B0" size="large" style={{ marginVertical: 24} } />
           ) : (
             <View style={styles.grid}>
               {tinyHeroFoods.map((food) => (
@@ -161,15 +161,15 @@ export default function FightGermsDetail({ goal, onBack, recommendations, recLoa
         <Text style={[styles.infoDescriptionText, { color: '#FF8A65', fontStyle: 'italic' }]}>Foods that make it hard to reach your goal.</Text>
 
         {recLoading ? (
-          <ActivityIndicator color="#FF8A65" size="large" style={ {marginVertical: 24} } />
+          <ActivityIndicator color="#FF8A65" size="large" style={{ marginVertical: 24} } />
         ) : tryLessFoods.length > 0 ? (
           <View style={styles.grid}>
             {tryLessFoods.map((food) => (
               <View key={food.cn_code} style={[styles.tryLessItemCard, { padding: 16 }]}>
                 <Text style={styles.tryLessFoodName}>{food.name}</Text>
-                <View style={[styles.badge, { backgroundColor: '#FFCCBC', marginTop: 8, alignSelf: 'flex-start' }]}>
-                  <Text style={[styles.badgeText, { color: '#BF360C' }]}>EAT LESS</Text>
-                </View>
+                {food.reason && (
+                  <Text style={styles.tryLessExplanation}>{food.reason}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -378,6 +378,14 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#36392c',
     textAlign: 'left',
+  },
+  tryLessExplanation: {
+    fontSize: 14,
+    color: '#BF360C',
+    fontWeight: '600',
+    marginTop: 8,
+    fontStyle: 'italic',
+    lineHeight: 20,
   },
   tryLessCard: {
     backgroundColor: '#fff',
