@@ -25,6 +25,7 @@ import { Radius } from '../../constants/radius';
 import { FontSize, FontFamily } from '../../constants/fonts';
 import { usePlacesSearch } from '../../hooks/usePlacesSearch';
 import type { Place } from '../../services/placesSearch';
+import { getCachedLocation, setCachedLocation } from '../../services/locationCache';
 
 // ─── Photo URL helper ─────────────────────────────────────────────────────────
 
@@ -67,7 +68,8 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
   const [userLatitude, setUserLatitude] = useState<number | null>(null);
   const [userLongitude, setUserLongitude] = useState<number | null>(null);
 
-  // Request location when modal becomes visible
+  // Request location when modal becomes visible.
+  // Uses a 2-minute in-memory cache to avoid repeated GPS calls.
   useEffect(() => {
     if (!visible) {
       return;
@@ -76,6 +78,15 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
     let cancelled = false;
 
     const requestLocation = async () => {
+      // Check cache first
+      const cached = getCachedLocation();
+      if (cached) {
+        setUserLatitude(cached.latitude);
+        setUserLongitude(cached.longitude);
+        setLocationStatus('granted');
+        return;
+      }
+
       setLocationStatus('requesting');
 
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -94,10 +105,9 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
 
         if (cancelled) return;
 
+        setCachedLocation(loc.coords.latitude, loc.coords.longitude);
         setUserLatitude(loc.coords.latitude);
         setUserLongitude(loc.coords.longitude);
-        console.log('user lat:', userLatitude);
-        console.log('user lng:', userLongitude);
         setLocationStatus('granted');
       } catch {
         if (!cancelled) setLocationStatus('denied');
