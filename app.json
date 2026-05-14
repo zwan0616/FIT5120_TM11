@@ -33,6 +33,18 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "NutriHeroes needs your location to find nearby stores where you can buy healthy food."
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "googleMapsApiKey": "$(GOOGLE_MAPS_API_KEY)"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/nutriheroes_icon.png",
@@ -43,7 +55,7 @@
             "backgroundColor": "#F6F8EC"
           }
         }
-      ],
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
