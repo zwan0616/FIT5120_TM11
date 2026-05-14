@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import { ArrowRight, Star, ArrowLeft, Map } from 'lucide-react-native';
 import type { Goal } from './types';
-import type { RecommendationResponse } from '../../services/recommendations';
+import type { RecommendationResponse, FoodItem } from '../../services/recommendations';
 import { useRouter } from 'expo-router';
+import FoodDetailModal from './FoodDetailModal';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +26,8 @@ interface Props {
 
 export default function SeeClearDetail({ goal, onBack, recommendations, recLoading }: Props) {
   const router = useRouter();
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   
   const handleFoodQuestPress = (foodName: string) => {
     // Navigate to food quest map with the food name
@@ -32,6 +35,11 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
       pathname: '/food-quest-map' as any,
       params: { foodName },
     });
+  };
+
+  const handleSmallCardPress = (food: FoodItem) => {
+    setSelectedFood(food);
+    setModalVisible(true);
   };
 
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
@@ -46,6 +54,10 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
 
   const tinyHeroFoods = recommendations?.tiny_hero_foods ?? [];
   const tryLessFoods = recommendations?.try_less_foods ?? [];
+
+  // Get full food items for small cards (with explanation data)
+  const sf1Full = recommendations?.super_power_foods?.[1] ?? null;
+  const sf2Full = recommendations?.super_power_foods?.[2] ?? null;
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Custom Back Button */}
@@ -72,60 +84,46 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
           <ActivityIndicator color="#2196F3" size="large" style={{ marginVertical: 24 }} />
         ) : (
           <View style={styles.grid}>
-            {/* Main Card */}
-            <View style={styles.mainCard}>
-              <View style={styles.cardHeader}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>GOOD CHOICE</Text>
-                </View>
-                <Text style={styles.foodNameLarge}>{sf0.name}</Text>
-              </View>
-              <View style={styles.mainImageContainer}>
-                <Image source={{ uri: sf0.image }} style={styles.mainImage} resizeMode="cover" />
-              </View>
-              <Text style={styles.descriptionText}>{sf0.description}</Text>
-              <TouchableOpacity 
-                style={styles.questButton}
-                onPress={() => handleFoodQuestPress(sf0.name)}
-                activeOpacity={0.7}
-              >
-                <Map color="#2E7D32" size={16} />
-                <Text style={styles.questButtonText}>Find This Food</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Row of smaller cards */}
-            <View style={styles.row}>
-              <View style={styles.smallCard}>
-                <View style={styles.smallImageContainer}>
-                  <Image source={{ uri: sf1.image }} style={styles.smallImage} resizeMode="contain" />
-                </View>
-                <Text style={styles.foodNameSmall}>{sf1.name}</Text>
-                <TouchableOpacity 
-                  style={styles.questButtonSmall}
-                  onPress={() => handleFoodQuestPress(sf1.name)}
+            {displaySuperFoods.map((food, index) => {
+              const fullFood = recommendations?.super_power_foods?.[index] ?? null;
+              return (
+                <TouchableOpacity
+                  key={food.name}
+                  style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#4CAF50', padding: 16 }]}
+                  onPress={() => handleSmallCardPress({
+                    name: food.name,
+                    image_url: food.image,
+                    grade: '',
+                    reason: '',
+                    cn_code: '',
+                    category: '',
+                    ...fullFood,
+                  })}
                   activeOpacity={0.7}
                 >
-                  <Map color="#2E7D32" size={14} />
-                  <Text style={styles.questButtonTextSmall}>Find This Food</Text>
+                  <View style={styles.cardHeader}>
+                    <View style={[styles.badge, { backgroundColor: '#4CAF50' }]}>
+                      <Text style={styles.badgeText}>GOOD CHOICE</Text>
+                    </View>
+                    <Text style={styles.foodNameLarge}>{food.name}</Text>
+                  </View>
+                  <View style={[styles.mainImageContainer, { height: 100 }]}>
+                    <Image source={{ uri: food.image }} style={styles.mainImage} resizeMode="cover" />
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.questButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleFoodQuestPress(food.name);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Map color="#2E7D32" size={16} />
+                    <Text style={styles.questButtonText}>Find This Food</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </View>
-
-              <View style={styles.smallCard}>
-                <View style={styles.smallImageContainer}>
-                  <Image source={{ uri: sf2.image }} style={styles.smallImage} resizeMode="contain" />
-                </View>
-                <Text style={styles.foodNameSmall}>{sf2.name}</Text>
-                <TouchableOpacity 
-                  style={styles.questButtonSmall}
-                  onPress={() => handleFoodQuestPress(sf2.name)}
-                  activeOpacity={0.7}
-                >
-                  <Map color="#2E7D32" size={14} />
-                  <Text style={styles.questButtonTextSmall}>Find This Food</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+              );
+            })}
           </View>
         )}
       </View>
@@ -198,6 +196,20 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
           </View>
         )}
       </View>
+
+      {/* Food Detail Modal */}
+      <FoodDetailModal
+        visible={modalVisible}
+        food={selectedFood ? {
+          name: selectedFood.name,
+          description: `Grade ${selectedFood.grade}`,
+          image: selectedFood.image_url,
+          explanation: selectedFood.reason,
+          cn_code: selectedFood.cn_code,
+          category: selectedFood.category,
+        } : null}
+        onClose={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }
