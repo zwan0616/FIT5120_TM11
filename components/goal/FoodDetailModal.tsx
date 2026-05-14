@@ -44,9 +44,9 @@ interface Props {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function openInGoogleMaps(place: Place) {
-  const url = `https://www.google.com/maps/search/?api=1&query_place_id=${place.place_id}`;
+  const url = place.googleMapsUri;
   Linking.openURL(url).catch(() => {
-    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat},${place.geometry.location.lng}`;
+    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.location.latitude},${place.location.longitude}`;
     Linking.openURL(fallback);
   });
 }
@@ -89,6 +89,8 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
 
         setUserLatitude(loc.coords.latitude);
         setUserLongitude(loc.coords.longitude);
+        console.log('user lat:', userLatitude);
+        console.log('user lng:', userLongitude);
         setLocationStatus('granted');
       } catch {
         if (!cancelled) setLocationStatus('denied');
@@ -166,12 +168,12 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
           >
             {places.map((place) => (
               <Marker
-                key={place.place_id}
+                key={place.id}
                 coordinate={{
-                  latitude: place.geometry.location.lat,
-                  longitude: place.geometry.location.lng,
+                  latitude: place.location.latitude,
+                  longitude: place.location.longitude,
                 }}
-                title={place.name}
+                title={place.displayName.text}
                 description={place.formatted_address}
               />
             ))}
@@ -207,19 +209,19 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
         {/* Results list (non-scrollable, rendered inline) */}
         {places.map((place) => (
           <TouchableOpacity
-            key={place.place_id}
+            key={place.id}
             style={styles.placeItem}
             activeOpacity={0.75}
             onPress={() => openInGoogleMaps(place)}
             accessibilityRole="button"
-            accessibilityLabel={`Open ${place.name} in Google Maps`}
+            accessibilityLabel={`Open ${place.displayName} in Google Maps`}
           >
             <View style={styles.placeIconWrap}>
               <MapPin size={20} color={Colors.primary} />
             </View>
             <View style={styles.placeTextWrap}>
               <Text style={styles.placeName} numberOfLines={1}>
-                {place.name}
+                {place.displayName.text}
               </Text>
               <Text style={styles.placeAddress} numberOfLines={2}>
                 {place.formatted_address}

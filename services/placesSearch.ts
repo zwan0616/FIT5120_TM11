@@ -15,15 +15,17 @@ const SEARCH_RADIUS_METRES = 5000;
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface Place {
-  place_id: string;
-  name: string;
-  formatted_address: string;
-  geometry: {
-    location: {
-      lat: number;
-      lng: number;
-    };
+  id: string;
+  displayName: {
+    languageCode: string;
+    text: string;
   };
+  formatted_address: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  googleMapsUri: string;
 }
 
 export interface PlacesSearchResult {
@@ -60,11 +62,11 @@ export async function searchPlaces(
   longitude: number,
   pageToken?: string
 ): Promise<PlacesSearchResult> {
-  const cacheKey = buildCacheKey(query, latitude, longitude, pageToken);
+  // const cacheKey = buildCacheKey(query, latitude, longitude, pageToken);
 
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)!;
-  }
+  // if (cache.has(cacheKey)) {
+  //   return cache.get(cacheKey)!;
+  // }
 
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
@@ -78,7 +80,27 @@ export async function searchPlaces(
   }
 
   const response = await fetch(
-    `https://maps.googleapis.com/maps/api/place/textsearch/json?${params.toString()}`
+    // `https://maps.googleapis.com/maps/api/place/textsearch/json?${params.toString()}`
+    `https://places.googleapis.com/v1/places:searchText`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        textQuery: query,
+        locationBias: {
+          circle: {
+            center: {latitude, longitude},
+            radius: 5000 // 5km radius
+          }
+        },
+        pageSize: 10,
+        rankPreference: 'RELEVANCE'
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_API_KEY,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.photos'
+      }
+    }
   );
 
   if (!response.ok) {
@@ -87,16 +109,16 @@ export async function searchPlaces(
 
   const data = await response.json();
 
-  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-    throw new Error(`Places API error: ${data.status} — ${data.error_message ?? ''}`);
-  }
+  // if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+  //   throw new Error(`Places API error: ${data.status} — ${data.error_message ?? ''}`);
+  // }
 
   const result: PlacesSearchResult = {
-    places: (data.results ?? []) as Place[],
+    places: (data.places ?? []) as Place[],
     nextPageToken: data.next_page_token,
   };
 
-  cache.set(cacheKey, result);
+  // cache.set(cacheKey, result);
 
   return result;
 }

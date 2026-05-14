@@ -59,6 +59,7 @@ export function usePlacesSearch({
         // Discard if a newer search has started
         if (searchId !== searchIdRef.current) return;
 
+        console.log('places:', JSON.stringify(result.places, undefined, 2));
         setPlaces((prev) => (append ? [...prev, ...result.places] : result.places));
         setNextPageToken(result.nextPageToken);
         setHasMore(!!result.nextPageToken);
@@ -85,7 +86,7 @@ export function usePlacesSearch({
       return;
     }
 
-    const query = `buy ${foodItem} near me`;
+    const query = `buy food ${foodItem} near me`;
     const searchId = ++searchIdRef.current;
 
     if (debounceTimerRef.current) {
@@ -106,7 +107,7 @@ export function usePlacesSearch({
   const loadMore = useCallback(() => {
     if (!foodItem || latitude === null || longitude === null || !nextPageToken || loading) return;
 
-    const query = `buy ${foodItem} near me`;
+    const query = `buy food ${foodItem} near me`;
     const searchId = ++searchIdRef.current;
     runSearch(query, latitude, longitude, nextPageToken, searchId, true);
   }, [foodItem, latitude, longitude, nextPageToken, loading, runSearch]);

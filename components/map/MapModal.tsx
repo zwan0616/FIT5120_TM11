@@ -45,10 +45,10 @@ interface MapModalProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function openInGoogleMaps(place: Place) {
-  const url = `https://www.google.com/maps/search/?api=1&query_place_id=${place.place_id}`;
+  const url = place.googleMapsUri;
   Linking.openURL(url).catch(() => {
     // Fallback: open by coordinates
-    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat},${place.geometry.location.lng}`;
+    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.location.latitude},${place.location.longitude}`;
     Linking.openURL(fallback);
   });
 }
@@ -127,14 +127,14 @@ export default function MapModal({ visible, foodItem, onClose }: MapModalProps) 
         activeOpacity={0.75}
         onPress={() => openInGoogleMaps(item)}
         accessibilityRole="button"
-        accessibilityLabel={`Open ${item.name} in Google Maps`}
+        accessibilityLabel={`Open ${item.displayName.text} in Google Maps`}
       >
         <View style={styles.placeIconWrap}>
           <MapPin size={20} color={Colors.primary} />
         </View>
         <View style={styles.placeTextWrap}>
           <Text style={styles.placeName} numberOfLines={1}>
-            {item.name}
+            {item.displayName.text}
           </Text>
           <Text style={styles.placeAddress} numberOfLines={2}>
             {item.formatted_address}
@@ -234,12 +234,12 @@ export default function MapModal({ visible, foodItem, onClose }: MapModalProps) 
         <MapView style={styles.map} initialRegion={initialRegion} showsUserLocation>
           {places.map((place) => (
             <Marker
-              key={place.place_id}
+              key={place.id}
               coordinate={{
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
+                latitude: place.location.latitude,
+                longitude: place.location.longitude,
               }}
-              title={place.name}
+              title={place.displayName.text}
               description={place.formatted_address}
               pinColor={Colors.primary}
             />
@@ -264,7 +264,7 @@ export default function MapModal({ visible, foodItem, onClose }: MapModalProps) 
         {/* Results list */}
         <FlatList
           data={places}
-          keyExtractor={(item) => item.place_id}
+          keyExtractor={(item) => item.id}
           renderItem={renderPlaceItem}
           ListHeaderComponent={renderListHeader}
           ListFooterComponent={renderListFooter}
