@@ -67,6 +67,7 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
   >('idle');
   const [userLatitude, setUserLatitude] = useState<number | null>(null);
   const [userLongitude, setUserLongitude] = useState<number | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   // Request location when modal becomes visible.
   // Uses a 2-minute in-memory cache to avoid repeated GPS calls.
@@ -192,6 +193,8 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                 }}
                 title={place.displayName.text}
                 description={place.formatted_address}
+                pinColor={selectedPlaceId === place.id ? Colors.secondary : Colors.primary}
+                onPress={() => setSelectedPlaceId(place.id)}
               />
             ))}
           </MapView>
@@ -227,10 +230,11 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
         {places.map((place) => {
           const firstPhoto = place.photos?.[0];
           const photoUrl = firstPhoto ? getPhotoUrl(firstPhoto.name) : null;
+          const isSelected = selectedPlaceId === place.id;
           return (
             <TouchableOpacity
               key={place.id}
-              style={styles.placeCard}
+              style={[styles.placeCard, isSelected && styles.placeCardSelected]}
               activeOpacity={0.75}
               onPress={() => openInGoogleMaps(place)}
               accessibilityRole="button"
@@ -573,6 +577,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.outline_variant,
+  },
+  placeCardSelected: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
+    backgroundColor: Colors.primary_container,
   },
   placeCardContent: {
     flex: 1,
