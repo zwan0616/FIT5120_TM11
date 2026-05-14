@@ -183,6 +183,8 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                   }
                 : undefined
             }
+            showsUserLocation={true}
+            toolbarEnabled={false}
           >
             {places.map((place) => (
               <Marker
@@ -507,6 +509,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.outline_variant,
+    paddingBottom: Spacing.md
   },
   mapWrapper: {
     height: 220,
@@ -573,7 +576,7 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.md,
     borderRadius: Radius.card,
-    backgroundColor: Colors.surface_container_low,
+    backgroundColor: Colors.surface_bright,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.outline_variant,

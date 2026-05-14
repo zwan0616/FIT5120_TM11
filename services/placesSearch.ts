@@ -69,11 +69,11 @@ export async function searchPlaces(
   longitude: number,
   pageToken?: string
 ): Promise<PlacesSearchResult> {
-  // const cacheKey = buildCacheKey(query, latitude, longitude, pageToken);
+  const cacheKey = buildCacheKey(query, latitude, longitude, pageToken);
 
-  // if (cache.has(cacheKey)) {
-  //   return cache.get(cacheKey)!;
-  // }
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!;
+  }
 
   const params = new URLSearchParams({
     query: encodeURIComponent(query),
@@ -125,7 +125,7 @@ export async function searchPlaces(
     nextPageToken: data.next_page_token,
   };
 
-  // cache.set(cacheKey, result);
+  cache.set(cacheKey, result);
 
   return result;
 }
