@@ -52,7 +52,7 @@ interface Props {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function openInGoogleMaps(place: Place) {
-  const url = place.googleMapsUri;
+  const url = place.googleMapsLinks.directionsUri || place.googleMapsLinks.placeUri || place.googleMapsUri;
   Linking.openURL(url).catch(() => {
     const fallback = `https://www.google.com/maps/search/?api=1&query=${place.location.latitude},${place.location.longitude}`;
     Linking.openURL(fallback);
@@ -195,7 +195,6 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                 }}
                 title={place.displayName.text}
                 description={place.formatted_address}
-                pinColor={selectedPlaceId === place.id ? Colors.secondary : Colors.primary}
                 onPress={() => setSelectedPlaceId(place.id)}
               />
             ))}
@@ -248,11 +247,14 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
             >
               {/* Text content */}
               <View style={styles.placeCardContent}>
-                <Text style={styles.placeName} numberOfLines={1}>
-                  {place.displayName.text}
-                </Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Image source={{uri: `${place.iconMaskBaseUri}.png`}} style={styles.placeIcon} />
+                  <Text style={styles.placeName} numberOfLines={1}>
+                    {place.displayName.text}
+                  </Text>
+                </View>
                 <Text style={styles.placeAddress} numberOfLines={2}>
-                  {place.formatted_address}
+                  {place.formattedAddress}
                 </Text>
                 <View style={styles.placeCardFooter}>
                   <Navigation size={12} color={Colors.primary} />
@@ -367,8 +369,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#f1f5f9',
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    borderTopLeftRadius: Radius.modal,
+    borderTopRightRadius: Radius.modal,
     maxHeight: '92%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
@@ -377,20 +379,20 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   modalContentInner: {
-    padding: 24,
-    paddingBottom: 48,
+    padding: Spacing.md,
+    paddingBottom: Spacing['4xl'],
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   badge: {
     backgroundColor: '#4CAF50',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
     alignSelf: 'flex-start',
   },
   badgeText: {
@@ -402,7 +404,7 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: Radius.full,
     backgroundColor: 'rgba(0,0,0,0.05)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -411,14 +413,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '900',
     color: '#36392c',
-    marginBottom: 20,
   },
   imageContainer: {
     height: 200,
     backgroundColor: '#fff',
-    borderRadius: 24,
+    borderRadius: Radius.card,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: Spacing.md,
     borderWidth: 4,
     borderColor: '#fff',
   },
@@ -428,15 +429,15 @@ const styles = StyleSheet.create({
   },
   explanationContainer: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
   },
   explanationTitle: {
     fontSize: 16,
     fontWeight: '800',
     color: '#4CAF50',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   explanationText: {
     fontSize: 15,
@@ -595,6 +596,12 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     justifyContent: 'center',
     gap: Spacing.xs,
+  },
+  placeIcon: {
+    marginRight: Spacing.xs,
+    color: Colors.primary,
+    width: 10,
+    height: 10,
   },
   placeName: {
     fontFamily: FontFamily.body_bold,

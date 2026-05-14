@@ -26,13 +26,18 @@ export interface Place {
     languageCode: string;
     text: string;
   };
-  formatted_address: string;
+  formattedAddress: string;
   location: {
     latitude: number;
     longitude: number;
   };
   googleMapsUri: string;
+  googleMapsLinks: {
+    directionsUri: string | undefined,
+    placeUri: string | undefined;
+  };
   photos?: PlacePhoto[];
+  iconMaskBaseUri: string;
 }
 
 export interface PlacesSearchResult {
@@ -87,7 +92,6 @@ export async function searchPlaces(
   }
 
   const response = await fetch(
-    // `https://maps.googleapis.com/maps/api/place/textsearch/json?${params.toString()}`
     `https://places.googleapis.com/v1/places:searchText`,
     {
       method: 'POST',
@@ -105,7 +109,16 @@ export async function searchPlaces(
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_API_KEY,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.googleMapsUri,places.photos'
+        'X-Goog-FieldMask': [
+          'places.id',
+          'places.displayName',
+          'places.formattedAddress',
+          'places.location',
+          'places.googleMapsUri',
+          'places.googleMapsLinks',
+          'places.photos',
+          'places.iconMaskBaseUri'
+        ].join(',')
       }
     }
   );
