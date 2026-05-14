@@ -14,6 +14,12 @@ const SEARCH_RADIUS_METRES = 5000;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface PlacePhoto {
+  name: string;
+  widthPx: number;
+  heightPx: number;
+}
+
 export interface Place {
   id: string;
   displayName: {
@@ -26,6 +32,7 @@ export interface Place {
     longitude: number;
   };
   googleMapsUri: string;
+  photos?: PlacePhoto[];
 }
 
 export interface PlacesSearchResult {

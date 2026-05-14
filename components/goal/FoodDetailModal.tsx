@@ -26,6 +26,13 @@ import { FontSize, FontFamily } from '../../constants/fonts';
 import { usePlacesSearch } from '../../hooks/usePlacesSearch';
 import type { Place } from '../../services/placesSearch';
 
+// ─── Photo URL helper ─────────────────────────────────────────────────────────
+
+function getPhotoUrl(photoName: string, maxWidth = 400): string {
+  const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+  return `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=${maxWidth}&key=${apiKey}`;
+}
+
 export interface FoodDetailData {
   name: string;
   description: string;
@@ -206,32 +213,47 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
           </View>
         )}
 
-        {/* Results list (non-scrollable, rendered inline) */}
-        {places.map((place) => (
-          <TouchableOpacity
-            key={place.id}
-            style={styles.placeItem}
-            activeOpacity={0.75}
-            onPress={() => openInGoogleMaps(place)}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${place.displayName} in Google Maps`}
-          >
-            <View style={styles.placeIconWrap}>
-              <MapPin size={20} color={Colors.primary} />
-            </View>
-            <View style={styles.placeTextWrap}>
-              <Text style={styles.placeName} numberOfLines={1}>
-                {place.displayName.text}
-              </Text>
-              <Text style={styles.placeAddress} numberOfLines={2}>
-                {place.formatted_address}
-              </Text>
-            </View>
-            <View style={styles.placeArrow}>
-              <Navigation size={16} color={Colors.outline} />
-            </View>
-          </TouchableOpacity>
-        ))}
+        {/* Results list — cards with photo */}
+        {places.map((place) => {
+          const firstPhoto = place.photos?.[0];
+          const photoUrl = firstPhoto ? getPhotoUrl(firstPhoto.name) : null;
+          return (
+            <TouchableOpacity
+              key={place.id}
+              style={styles.placeCard}
+              activeOpacity={0.75}
+              onPress={() => openInGoogleMaps(place)}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${place.displayName.text} in Google Maps`}
+            >
+              {/* Text content */}
+              <View style={styles.placeCardContent}>
+                <Text style={styles.placeName} numberOfLines={1}>
+                  {place.displayName.text}
+                </Text>
+                <Text style={styles.placeAddress} numberOfLines={2}>
+                  {place.formatted_address}
+                </Text>
+                <View style={styles.placeCardFooter}>
+                  <Navigation size={12} color={Colors.primary} />
+                  <Text style={styles.placeCardLink}>Open in Maps</Text>
+                </View>
+              </View>
+              {/* Photo */}
+              {photoUrl ? (
+                <Image
+                  source={{ uri: photoUrl }}
+                  style={styles.placeCardPhoto}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.placeCardPhotoPlaceholder}>
+                  <MapPin size={24} color={Colors.outline} />
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
 
         {/* Load more / footer loader */}
         {loading && places.length > 0 && (
@@ -530,33 +552,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Place item
-  placeItem: {
+  // Place card
+  placeCard: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.surface_container,
-    gap: Spacing.md,
+    alignItems: 'stretch',
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    borderRadius: Radius.card,
+    backgroundColor: Colors.surface_container_low,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.outline_variant,
   },
-  placeIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.primary_container,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  placeTextWrap: {
+  placeCardContent: {
     flex: 1,
+    padding: Spacing.md,
+    justifyContent: 'center',
+    gap: Spacing.xs,
   },
   placeName: {
     fontFamily: FontFamily.body_bold,
     fontSize: FontSize.body_md,
     color: Colors.on_surface,
-    marginBottom: 2,
   },
   placeAddress: {
     fontFamily: FontFamily.body,
@@ -564,8 +581,29 @@ const styles = StyleSheet.create({
     color: Colors.on_surface_variant,
     lineHeight: FontSize.label_sm * 1.4,
   },
-  placeArrow: {
+  placeCardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  placeCardLink: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.label_sm,
+    color: Colors.primary,
+  },
+  placeCardPhoto: {
+    width: 96,
+    height: 96,
     flexShrink: 0,
+  },
+  placeCardPhotoPlaceholder: {
+    width: 96,
+    height: 96,
+    flexShrink: 0,
+    backgroundColor: Colors.surface_container,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Footer
