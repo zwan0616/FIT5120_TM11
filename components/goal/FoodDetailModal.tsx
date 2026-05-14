@@ -16,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from '../map/MapView';
 import * as Location from 'expo-location';
 import { X, MapPin, Navigation } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
