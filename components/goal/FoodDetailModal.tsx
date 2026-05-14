@@ -1,22 +1,30 @@
 /**
  * FoodDetailModal - Modal component for displaying expanded food card details
- * Shows a food item in a large card format with explanation when clicked
+ * Shows a food item in a large card format with explanation when clicked.
+ * Includes an inline map section below the food details to find nearby stores.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
+  ActivityIndicator,
+  FlatList,
   Image,
+  Linking,
   Modal,
+  StyleSheet,
+  Text,
   TouchableOpacity,
-  Dimensions,
+  View,
 } from 'react-native';
-import { X, Map } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-
-const { width } = Dimensions.get('window');
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { X, MapPin, Navigation } from 'lucide-react-native';
+import { Colors } from '../../constants/colors';
+import { Spacing } from '../../constants/spacing';
+import { Radius } from '../../constants/radius';
+import { FontSize, FontFamily } from '../../constants/fonts';
+import { usePlacesSearch } from '../../hooks/usePlacesSearch';
+import type { Place } from '../../services/placesSearch';
 
 export interface FoodDetailData {
   name: string;
@@ -33,16 +41,211 @@ interface Props {
   onClose: () => void;
 }
 
-export default function FoodDetailModal({ visible, food, onClose }: Props) {
-  const router = useRouter();
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  const handleFoodQuestPress = () => {
-    if (food?.name) {
-      router.push({
-        pathname: '/food-quest-map' as any,
-        params: { foodName: food.name },
-      });
+function openInGoogleMaps(place: Place) {
+  const url = `https://www.google.com/maps/search/?api=1&query_place_id=${place.place_id}`;
+  Linking.openURL(url).catch(() => {
+    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat},${place.geometry.location.lng}`;
+    Linking.openURL(fallback);
+  });
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function FoodDetailModal({ visible, food, onClose }: Props) {
+  const [locationStatus, setLocationStatus] = useState<
+    'idle' | 'requesting' | 'granted' | 'denied'
+  >('idle');
+  const [userLatitude, setUserLatitude] = useState<number | null>(null);
+  const [userLongitude, setUserLongitude] = useState<number | null>(null);
+
+  // Request location when modal becomes visible
+  useEffect(() => {
+    if (!visible) {
+      return;
     }
+
+    let cancelled = false;
+
+    const requestLocation = async () => {
+      setLocationStatus('requesting');
+
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (cancelled) return;
+
+      if (status !== 'granted') {
+        setLocationStatus('denied');
+        return;
+      }
+
+      try {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        if (cancelled) return;
+
+        setUserLatitude(loc.coords.latitude);
+        setUserLongitude(loc.coords.longitude);
+        setLocationStatus('granted');
+      } catch {
+        if (!cancelled) setLocationStatus('denied');
+      }
+    };
+
+    requestLocation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible]);
+
+  const { places, loading, error, hasMore, loadMore } = usePlacesSearch({
+    foodItem: locationStatus === 'granted' ? (food?.name ?? null) : null,
+    latitude: userLatitude,
+    longitude: userLongitude,
+  });
+
+  const handleClose = useCallback(() => {
+    setLocationStatus('idle');
+    setUserLatitude(null);
+    setUserLongitude(null);
+    onClose();
+  }, [onClose]);
+
+  // ─── Map section ─────────────────────────────────────────────────────────────
+
+  const renderMapSection = () => {
+    if (locationStatus === 'idle' || locationStatus === 'requesting') {
+      return (
+        <View style={styles.mapLoadingState}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+          <Text style={styles.mapLoadingText}>Getting your location…</Text>
+        </View>
+      );
+    }
+
+    if (locationStatus === 'denied') {
+      return (
+        <View style={styles.mapDeniedState}>
+          <MapPin size={28} color={Colors.outline} />
+          <Text style={styles.mapDeniedTitle}>Location access needed</Text>
+          <Text style={styles.mapDeniedSubtitle}>
+            Enable location in Settings to find nearby stores.
+          </Text>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => Linking.openSettings()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.settingsButtonText}>Open Settings</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // granted
+    return (
+      <View style={styles.mapGrantedContainer}>
+        {/* Map */}
+        <View style={styles.mapWrapper}>
+          <MapView
+            style={styles.map}
+            initialRegion={
+              userLatitude !== null && userLongitude !== null
+                ? {
+                    latitude: userLatitude,
+                    longitude: userLongitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }
+                : undefined
+            }
+          >
+            {places.map((place) => (
+              <Marker
+                key={place.place_id}
+                coordinate={{
+                  latitude: place.geometry.location.lat,
+                  longitude: place.geometry.location.lng,
+                }}
+                title={place.name}
+                description={place.formatted_address}
+              />
+            ))}
+          </MapView>
+          {loading && places.length === 0 && (
+            <View style={styles.mapLoadingOverlay}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+              <Text style={styles.mapLoadingText}>Finding nearby stores…</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Results header */}
+        <View style={styles.resultsHeader}>
+          <Text style={styles.resultsTitle}>Search Results</Text>
+          {places.length > 0 && (
+            <Text style={styles.resultsCount}>{places.length} found</Text>
+          )}
+        </View>
+
+        {/* Error */}
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && places.length === 0 && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No stores found nearby.</Text>
+          </View>
+        )}
+
+        {/* Results list (non-scrollable, rendered inline) */}
+        {places.map((place) => (
+          <TouchableOpacity
+            key={place.place_id}
+            style={styles.placeItem}
+            activeOpacity={0.75}
+            onPress={() => openInGoogleMaps(place)}
+            accessibilityRole="button"
+            accessibilityLabel={`Open ${place.name} in Google Maps`}
+          >
+            <View style={styles.placeIconWrap}>
+              <MapPin size={20} color={Colors.primary} />
+            </View>
+            <View style={styles.placeTextWrap}>
+              <Text style={styles.placeName} numberOfLines={1}>
+                {place.name}
+              </Text>
+              <Text style={styles.placeAddress} numberOfLines={2}>
+                {place.formatted_address}
+              </Text>
+            </View>
+            <View style={styles.placeArrow}>
+              <Navigation size={16} color={Colors.outline} />
+            </View>
+          </TouchableOpacity>
+        ))}
+
+        {/* Load more / footer loader */}
+        {loading && places.length > 0 && (
+          <ActivityIndicator
+            color={Colors.primary}
+            size="small"
+            style={styles.footerLoader}
+          />
+        )}
+        {hasMore && !loading && (
+          <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore} activeOpacity={0.8}>
+            <Text style={styles.loadMoreText}>Load More</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
   if (!food) return null;
@@ -52,51 +255,61 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
       visible={visible}
       animationType="slide"
       transparent={true}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          {/* Header with close button */}
-          <View style={styles.header}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>SUPER POWER FOOD</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={onClose}
-              activeOpacity={0.7}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <X size={28} color="#36392c" />
-            </TouchableOpacity>
-          </View>
+        <FlatList
+          style={styles.modalContent}
+          contentContainerStyle={styles.modalContentInner}
+          keyboardShouldPersistTaps="handled"
+          data={[]}
+          renderItem={null}
+          ListHeaderComponent={
+            <>
+              {/* Header with close button */}
+              <View style={styles.header}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>SUPER POWER FOOD</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleClose}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  <X size={28} color="#36392c" />
+                </TouchableOpacity>
+              </View>
 
-          {/* Food Name */}
-          <Text style={styles.foodName}>{food.name}</Text>
+              {/* Food Name */}
+              <Text style={styles.foodName}>{food.name}</Text>
 
-          {/* Food Image */}
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: food.image }} style={styles.image} resizeMode="cover" />
-          </View>
-          
-          {/* Explanation/Reason */}
-          {food.explanation && (
-            <View style={styles.explanationContainer}>
-              <Text style={styles.explanationTitle}>Why it's great:</Text>
-              <Text style={styles.explanationText}>{food.explanation}</Text>
-            </View>
-          )}
+              {/* Food Image */}
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: food.image }} style={styles.image} resizeMode="cover" />
+              </View>
 
-          {/* Find This Food Button */}
-          <TouchableOpacity
-            style={styles.questButton}
-            onPress={handleFoodQuestPress}
-            activeOpacity={0.7}
-          >
-            <Map color="#2E7D32" size={18} />
-            <Text style={styles.questButtonText}>Find This Food</Text>
-          </TouchableOpacity>
-        </View>
+              {/* Explanation/Reason */}
+              {food.explanation && (
+                <View style={styles.explanationContainer}>
+                  <Text style={styles.explanationTitle}>{"Why it's great:"}</Text>
+                  <Text style={styles.explanationText}>{food.explanation}</Text>
+                </View>
+              )}
+
+              {/* Map section divider */}
+              <View style={styles.mapSectionDivider}>
+                <MapPin size={16} color={Colors.primary} />
+                <Text style={styles.mapSectionTitle}>
+                  Where to buy {food.name}
+                </Text>
+              </View>
+
+              {/* Inline map + results */}
+              {renderMapSection()}
+            </>
+          }
+        />
       </View>
     </Modal>
   );
@@ -112,14 +325,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    padding: 24,
-    paddingBottom: 40,
+    maxHeight: '92%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
     shadowRadius: 15,
     elevation: 8,
-    maxHeight: '90%',
+  },
+  modalContentInner: {
+    padding: 24,
+    paddingBottom: 48,
   },
   header: {
     flexDirection: 'row',
@@ -167,13 +382,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  description: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#64748b',
-    fontStyle: 'italic',
-    marginBottom: 20,
-  },
   explanationContainer: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -192,21 +400,187 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
   },
-  questButton: {
+
+  // Map section
+  mapSectionDivider: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    alignSelf: 'center',
-    marginTop: 8,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.outline_variant,
   },
-  questButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2E7D32',
+  mapSectionTitle: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.title_sm,
+    color: Colors.on_surface,
+    textTransform: 'capitalize',
+  },
+
+  // Location requesting / denied states
+  mapLoadingState: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.lg,
+    justifyContent: 'center',
+  },
+  mapLoadingText: {
+    fontFamily: FontFamily.body_medium,
+    fontSize: FontSize.body_sm,
+    color: Colors.on_surface_variant,
+  },
+  mapDeniedState: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  mapDeniedTitle: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.title_sm,
+    color: Colors.on_surface,
+    marginTop: Spacing.xs,
+  },
+  mapDeniedSubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body_sm,
+    color: Colors.on_surface_variant,
+    textAlign: 'center',
+    lineHeight: FontSize.body_sm * 1.5,
+  },
+  settingsButton: {
+    marginTop: Spacing.md,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.button_primary,
+  },
+  settingsButtonText: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.label_lg,
+    color: Colors.on_primary,
+  },
+
+  // Map granted
+  mapGrantedContainer: {
+    borderRadius: Radius.card,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.outline_variant,
+  },
+  mapWrapper: {
+    height: 220,
+    position: 'relative',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  mapLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(242,249,234,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline_variant,
+  },
+  resultsTitle: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.title_sm,
+    color: Colors.on_surface,
+  },
+  resultsCount: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.label_sm,
+    color: Colors.on_surface_variant,
+  },
+  errorText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body_sm,
+    color: Colors.error,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+  },
+  emptyState: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body_sm,
+    color: Colors.on_surface_variant,
+    textAlign: 'center',
+  },
+
+  // Place item
+  placeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.surface_container,
+    gap: Spacing.md,
+  },
+  placeIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary_container,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  placeTextWrap: {
+    flex: 1,
+  },
+  placeName: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.body_md,
+    color: Colors.on_surface,
+    marginBottom: 2,
+  },
+  placeAddress: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.label_sm,
+    color: Colors.on_surface_variant,
+    lineHeight: FontSize.label_sm * 1.4,
+  },
+  placeArrow: {
+    flexShrink: 0,
+  },
+
+  // Footer
+  footerLoader: {
+    marginVertical: Spacing.lg,
+  },
+  loadMoreButton: {
+    marginHorizontal: Spacing.lg,
+    marginVertical: Spacing.lg,
+    backgroundColor: Colors.primary_container,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.button_secondary,
+    alignItems: 'center',
+  },
+  loadMoreText: {
+    fontFamily: FontFamily.body_bold,
+    fontSize: FontSize.label_lg,
+    color: Colors.on_primary_container,
   },
 });
