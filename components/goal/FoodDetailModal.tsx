@@ -226,8 +226,12 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
           </View>
         )}
 
-        {/* Results list — cards with photo */}
-        {places.map((place) => {
+        {/* Results list — selected card floats to top */}
+        {[...places].sort((a, b) => {
+          if (a.id === selectedPlaceId) return -1;
+          if (b.id === selectedPlaceId) return 1;
+          return 0;
+        }).map((place) => {
           const firstPhoto = place.photos?.[0];
           const photoUrl = firstPhoto ? getPhotoUrl(firstPhoto.name) : null;
           const isSelected = selectedPlaceId === place.id;
