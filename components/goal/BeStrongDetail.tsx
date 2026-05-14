@@ -202,7 +202,7 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
         visible={modalVisible}
         food={selectedFood ? {
           name: selectedFood.name,
-          description: `Grade ${selectedFood.grade}`,
+          description: '',
           image: selectedFood.image_url,
           explanation: selectedFood.reason,
           cn_code: selectedFood.cn_code,
