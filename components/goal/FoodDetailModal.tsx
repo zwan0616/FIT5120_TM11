@@ -52,7 +52,7 @@ interface Props {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function openInGoogleMaps(place: Place) {
-  const url = place.googleMapsLinks.directionsUri || place.googleMapsLinks.placeUri || place.googleMapsUri;
+  const url = place.googleMapsLinks.placeUri || place.googleMapsUri;
   Linking.openURL(url).catch(() => {
     const fallback = `https://www.google.com/maps/search/?api=1&query=${place.location.latitude},${place.location.longitude}`;
     Linking.openURL(fallback);
@@ -194,7 +194,7 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                   longitude: place.location.longitude,
                 }}
                 title={place.displayName.text}
-                description={place.formatted_address}
+                description={place.formattedAddress}
                 onPress={() => setSelectedPlaceId(place.id)}
               />
             ))}
@@ -241,7 +241,7 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
               key={place.id}
               style={[styles.placeCard, isSelected && styles.placeCardSelected]}
               activeOpacity={0.75}
-              onPress={() => openInGoogleMaps(place)}
+              onPress={() => Linking.openURL(place.googleMapsLinks.placeUri || place.googleMapsUri)}
               accessibilityRole="button"
               accessibilityLabel={`Open ${place.displayName.text} in Google Maps`}
             >
@@ -256,10 +256,10 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                 <Text style={styles.placeAddress} numberOfLines={2}>
                   {place.formattedAddress}
                 </Text>
-                <View style={styles.placeCardFooter}>
-                  <Navigation size={12} color={Colors.primary} />
-                  <Text style={styles.placeCardLink}>Open in Maps</Text>
-                </View>
+                <TouchableOpacity style={styles.placeCardFooter} onPress={() => place.googleMapsLinks.directionsUri && Linking.openURL(place.googleMapsLinks.directionsUri)}>
+                  <Navigation size={12} color={Colors.on_primary} />
+                  <Text style={styles.placeCardLink}>Directions</Text>
+                </TouchableOpacity>
               </View>
               {/* Photo */}
               {photoUrl ? (
@@ -615,15 +615,20 @@ const styles = StyleSheet.create({
     lineHeight: FontSize.label_sm * 1.4,
   },
   placeCardFooter: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.xs,
-    marginTop: Spacing.xs,
+    maxWidth: 100,
+    marginVertical: Spacing.xs,
+    paddingVertical: Spacing.sm
   },
   placeCardLink: {
     fontFamily: FontFamily.body_bold,
     fontSize: FontSize.label_sm,
-    color: Colors.primary,
+    color: Colors.on_primary,
   },
   placeCardPhoto: {
     width: 96,

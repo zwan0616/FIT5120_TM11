@@ -59,7 +59,7 @@ export function usePlacesSearch({
         // Discard if a newer search has started
         if (searchId !== searchIdRef.current) return;
 
-        console.log('places:', JSON.stringify(result.places[0], undefined, 2));
+        // console.log('places:', JSON.stringify(result.places[0], undefined, 2));
         setPlaces((prev) => (append ? [...prev, ...result.places] : result.places));
         setNextPageToken(result.nextPageToken);
         setHasMore(!!result.nextPageToken);
