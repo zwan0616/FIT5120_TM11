@@ -29,11 +29,11 @@ import {
 import { FOOD_PREFERENCE_ITEMS, BLACKLIST_ITEMS } from '@/components/profile/FoodPreferencesSelector';
 import { Image } from 'expo-image';
 
-const LEVEL_THRESHOLDS = [
+export const LEVEL_THRESHOLDS = [
   { level: 1, exp: 0 },
-  { level: 2, exp: 100 },
-  { level: 3, exp: 450 },
-  { level: 4, exp: 1000 },
+  { level: 2, exp: 1000 },
+  { level: 3, exp: 4500 },
+  { level: 4, exp: 10000 },
 ] as const;
 
 const EARN_EXP_ITEMS = [
@@ -450,15 +450,21 @@ export default function ProfileScreen() {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statEmoji}>⭐</Text>
-              <Text style={styles.statValue}>{profile.totalPoints}</Text>
-              <Text style={styles.statLabel}>Total EXP</Text>
+              <Text style={styles.statEmoji}>📖</Text>
+              <Text style={styles.statValue}>{profile.completedStories.length}</Text>
+              <Text style={styles.statLabel}>Stories Read</Text>
             </View>
 
             <View style={styles.statCard}>
               <Text style={styles.statEmoji}>🍽️</Text>
               <Text style={styles.statValue}>{mealMakerHighScore}</Text>
               <Text style={styles.statLabel}>Meal Maker Best</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <Text style={styles.statEmoji}>📋</Text>
+              <Text style={styles.statValue}>{profile.dailyChallengesCompleted}</Text>
+              <Text style={styles.statLabel}>Daily Challenges Completed</Text>
             </View>
           </View>
         </View>

@@ -62,6 +62,19 @@ export interface DailyRewardResult {
 }
 
 /**
+ * Returns the number of plays that have awarded points today.
+ * @param gameId - Identifier for the game (e.g. 'meal-maker')
+ * @returns number
+ */
+export async function getPlaysToday(gameId: string): Promise<number> {
+  const today = getTodayString();
+  const key = buildKey(gameId, today);
+  const raw = await AsyncStorage.getItem(key);
+  const playsToday = raw !== null ? parseInt(raw, 10) : 0;
+  return playsToday;
+}
+
+/**
  * Attempt to claim points for completing a game.
  *
  * - Reads today's play count for the given game.

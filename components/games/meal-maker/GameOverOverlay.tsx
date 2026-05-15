@@ -174,7 +174,7 @@ export default function GameOverOverlay({
                 </Animated.View>
 
                 <Text style={styles.playsText}>
-                  Daily plays: {dailyReward.playsToday}/{MAX_DAILY_PLAYS}
+                  Scoring Games: {dailyReward.playsToday}/{MAX_DAILY_PLAYS}
                 </Text>
               </View>
             ) : (

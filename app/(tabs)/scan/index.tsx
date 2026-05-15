@@ -61,7 +61,6 @@ export default function ScanScreen() {
           </Animated.View>
 
           <View style={styles.instructionText}>
-            <CircleArrowDown size={30} style={{marginRight: 8, marginTop: 2}}/>
             <Text style={styles.sectionTitle}>How to Scan</Text>
           </View>
 

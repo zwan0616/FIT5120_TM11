@@ -12,6 +12,7 @@ import { Colors } from '@/constants/colors';
 import { getUserProfile, UserProfile } from '@/services/userProfile';
 import { Radius } from '@/constants/radius';
 import { Image } from 'expo-image';
+import { LEVEL_THRESHOLDS } from '@/app/profile';
 
 export default function ProfileButton() {
   const [profile, setProfile] = useState<UserProfile>();
@@ -19,14 +20,14 @@ export default function ProfileButton() {
   const getAvatarButtonImage = () => {
     switch (profile?.avatarId) {
       case 'hero':
-        if (profile.totalPoints > 300) return (<Image source={require('../../assets/images/avatar/hero-4.png')} style={styles.avatarButtonImage}/>);
-        if (profile.totalPoints > 200) return (<Image source={require('../../assets/images/avatar/hero-3.png')} style={styles.avatarButtonImage}/>);
-        if (profile.totalPoints > 100) return (<Image source={require('../../assets/images/avatar/hero-2.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[3].exp) return (<Image source={require('../../assets/images/avatar/hero-4.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[2].exp) return (<Image source={require('../../assets/images/avatar/hero-3.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[1].exp) return (<Image source={require('../../assets/images/avatar/hero-2.png')} style={styles.avatarButtonImage}/>);
         return (<Image source={require('../../assets/images/avatar/hero-1.png')} style={styles.avatarButtonImage}/>);
       case 'princess':
-        if (profile.totalPoints > 300) return (<Image source={require('../../assets/images/avatar/princess-4.png')} style={styles.avatarButtonImage}/>);
-        if (profile.totalPoints > 200) return (<Image source={require('../../assets/images/avatar/princess-3.png')} style={styles.avatarButtonImage}/>);
-        if (profile.totalPoints > 100) return (<Image source={require('../../assets/images/avatar/princess-2.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[3].exp) return (<Image source={require('../../assets/images/avatar/princess-4.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[2].exp) return (<Image source={require('../../assets/images/avatar/princess-3.png')} style={styles.avatarButtonImage}/>);
+        if (profile.totalPoints > LEVEL_THRESHOLDS[1].exp) return (<Image source={require('../../assets/images/avatar/princess-2.png')} style={styles.avatarButtonImage}/>);
         return (<Image source={require('../../assets/images/avatar/princess-1.png')} style={styles.avatarButtonImage}/>);
       default:
         break;

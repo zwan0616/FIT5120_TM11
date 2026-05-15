@@ -19,9 +19,9 @@ export interface DifficultyConfig {
 }
 
 export const DIFFICULTY_CONFIG: Record<GameDifficulty, DifficultyConfig> = {
-  easy:   { spawnMultiplier: 1.4, fallMultiplier: 1.4, pointsMultiplier: 0.8 },
+  easy:   { spawnMultiplier: 1.4, fallMultiplier: 1.6, pointsMultiplier: 0.8 },
   medium: { spawnMultiplier: 1.0, fallMultiplier: 1.0, pointsMultiplier: 1.0 },
-  hard:   { spawnMultiplier: 0.7, fallMultiplier: 0.7, pointsMultiplier: 1.25 },
+  hard:   { spawnMultiplier: 0.7, fallMultiplier: 0.7, pointsMultiplier: 1.5 },
 };
 
 // ─── Timing & Layout ────────────────────────────────────────────────────────

@@ -32,14 +32,6 @@ const GAMES: GameTile[] = [
     route: '/(tabs)/heroWorld/meal-maker',
     available: true,
   },
-  {
-    id: 'coming-soon-1',
-    title: 'Coming Soon',
-    emoji: '🔒',
-    description: 'More games on the way!',
-    route: '',
-    available: false,
-  },
 ];
 
 export default function HeroWorldScreen() {
@@ -126,7 +118,7 @@ export default function HeroWorldScreen() {
           <View style={styles.grid}>
             <View style={styles.row}>
               {GAMES.map((game) => (
-                <View style={{width: '50%', height: 'auto'}} key={game.id}>
+                <View style={{width: '100%', height: 'auto'}} key={game.id}>
                   {renderGameTile({ item: game })}
                 </View>
               ))}

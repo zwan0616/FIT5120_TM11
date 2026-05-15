@@ -31,6 +31,7 @@ import ThinkFastDetail from '../../components/goal/ThinkFastDetail';
 import type { Alternative, Goal, SuperFood, TryLess } from '../../components/goal/types';
 import { getUserProfile } from '../../services/userProfile';
 import { getRecommendations, type RecommendationResponse } from '../../services/recommendations';
+import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 
 // Re-export types for backward compatibility with imports like `import { Goal } from '../types'`
 export type { Alternative, Goal, SuperFood, TryLess };
@@ -270,7 +271,14 @@ export default function GoalScreen() {
                 <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
                   <goal.icon size={40} color="#ffffff" />
                 </View>
-                <Text style={styles.cardTitle}>{goal.title}</Text>
+                <AutoSizeText
+                  textBreakStrategy='simple'
+                  mode={ResizeTextMode.max_lines}
+                  numberOfLines={2}
+                  fontSize={styles.cardTitle.fontSize}
+                  style={styles.cardTitle}>
+                    {goal.title}
+                </AutoSizeText>
                 <Text style={styles.cardSubtitle}>{goal.subtitle}</Text>
               </View>
             </View>

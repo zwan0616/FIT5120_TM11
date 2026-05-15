@@ -22,7 +22,7 @@ import { X, MapPin, Navigation } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing } from '../../constants/spacing';
 import { Radius } from '../../constants/radius';
-import { FontSize, FontFamily } from '../../constants/fonts';
+import { FontSize, FontFamily, Typography } from '../../constants/fonts';
 import { usePlacesSearch } from '../../hooks/usePlacesSearch';
 import type { Place } from '../../services/placesSearch';
 import { getCachedLocation, setCachedLocation } from '../../services/locationCache';
@@ -47,16 +47,6 @@ interface Props {
   visible: boolean;
   food: FoodDetailData | null;
   onClose: () => void;
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function openInGoogleMaps(place: Place) {
-  const url = place.googleMapsLinks.placeUri || place.googleMapsUri;
-  Linking.openURL(url).catch(() => {
-    const fallback = `https://www.google.com/maps/search/?api=1&query=${place.location.latitude},${place.location.longitude}`;
-    Linking.openURL(fallback);
-  });
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -351,6 +341,16 @@ export default function FoodDetailModal({ visible, food, onClose }: Props) {
                 </Text>
               </View>
 
+              <View style={styles.safetyCard}>
+                <View style={styles.safetyMascotContainer}>
+                <Text style={styles.safetyMascot}>🦸</Text>
+              </View>
+              <View style={styles.safetyTextContainer}>
+                <Text style={styles.safetyTitle}>Safety First!</Text>
+                <Text style={styles.safetyDescription}>Ask a trusted adult before visiting any place.</Text>
+              </View>
+            </View>
+
               {/* Inline map + results */}
               {renderMapSection()}
             </>
@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
   },
   placeCardPhoto: {
     width: 96,
-    height: 96,
+    height: 'auto',
     flexShrink: 0,
   },
   placeCardPhotoPlaceholder: {
@@ -660,5 +660,41 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.body_bold,
     fontSize: FontSize.label_lg,
     color: Colors.on_primary_container,
+  },
+  safetyCard: {
+    backgroundColor: `${Colors.secondary_container}90`,
+    borderRadius: Radius.card,
+    padding: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
+    marginBottom: Spacing.lg,
+    overflow: 'hidden',
+  },
+  safetyMascotContainer: {
+    flexShrink: 0,
+    width: 96,
+    height: 96,
+    borderRadius: Radius.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  safetyMascot: {
+    fontSize: 50
+  },
+  safetyTextContainer: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  safetyTitle: {
+    ...Typography.titleMedium,
+    color: Colors.secondary,
+    fontWeight: '700',
+  },
+  safetyDescription: {
+    ...Typography.bodyMedium,
+    color: Colors.on_secondary_container,
+    fontWeight: '600',
   },
 });

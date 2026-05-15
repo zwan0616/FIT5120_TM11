@@ -44,6 +44,7 @@ export interface UserProfile {
   totalPoints: number;
   foodPreferences?: FoodPreferences;
   completedStories: string[];
+  dailyChallengesCompleted: number;
 }
 
 // ─── Storage Keys ────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export async function createUserProfile(
     totalPoints: 0,
     foodPreferences,
     completedStories: [],
+    dailyChallengesCompleted: 0
   };
   await saveUserProfile(profile);
   return profile;
@@ -158,6 +160,16 @@ export async function addTotalPoints(points: number): Promise<void> {
   const profile = await getUserProfile();
   if (!profile) return;
   profile.totalPoints = Math.max(0, profile.totalPoints + points);
+  await saveUserProfile(profile);
+}
+
+/**
+ * Increments the daily challenges completed counter.
+ */
+export async function incrementDailyChallengesCompleted(): Promise<void> {
+  const profile = await getUserProfile();
+  if (!profile) return;
+  profile.dailyChallengesCompleted += 1;
   await saveUserProfile(profile);
 }
 

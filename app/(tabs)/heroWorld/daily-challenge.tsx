@@ -4,7 +4,7 @@ import { Typography } from "@/constants/fonts";
 import { Radius } from "@/constants/radius";
 import { Spacing } from "@/constants/spacing";
 import { completeDailyChallenge, getNextDailyChallenge, isDailyChallengeCompletedToday, markDailyChallengeCompletedToday, type DailyChallengeTask } from "@/services/dailyChallenge";
-import { addTotalPoints, hasUserProfile } from "@/services/userProfile";
+import { addTotalPoints, hasUserProfile, incrementDailyChallengesCompleted } from "@/services/userProfile";
 import { useRouter } from "expo-router";
 import { Check, CheckCircle, ChevronRight, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
@@ -140,6 +140,7 @@ export default function DailyChallengeScreen() {
       let awarded = false;
       if (profileExists) {
         await addTotalPoints(DAILY_CHALLENGE_EXP);
+        await incrementDailyChallengesCompleted();
         awarded = true;
       }
       setPointsAwarded(awarded);

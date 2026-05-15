@@ -31,9 +31,9 @@ interface OptionsModalProps {
 }
 
 const DIFFICULTIES: { key: GameDifficulty; label: string; emoji: string; description: string }[] = [
-  { key: 'easy',   label: 'Easy',   emoji: '🌱', description: 'Slower items, 0.8× points' },
-  { key: 'medium', label: 'Medium', emoji: '⚡', description: 'Normal speed, 1× points' },
-  { key: 'hard',   label: 'Hard',   emoji: '🔥', description: 'Faster items, 1.25× points' },
+  { key: 'easy',   label: 'Easy',   emoji: '🌱', description: 'Slower items, 0.8x points' },
+  { key: 'medium', label: 'Medium', emoji: '⚡', description: 'Normal speed, 1x points' },
+  { key: 'hard',   label: 'Hard',   emoji: '🔥', description: 'Faster items, 1.5x points' },
 ];
 
 const VOLUME_STEP = 0.1;
@@ -76,7 +76,7 @@ export default function OptionsModal({
 
           {/* Volume */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>🔊 Volume</Text>
+            <Text style={styles.sectionLabel}>🔊 Music Volume</Text>
             <View style={styles.volumeRow}>
               <TouchableOpacity
                 style={styles.volumeStepButton}

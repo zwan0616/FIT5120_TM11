@@ -22,7 +22,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Audio } from 'expo-av';
 import { BookOpen, LogOut, Play, Settings, Star } from 'lucide-react-native';
 
-import { useGameEngine } from '@/hooks/games/useGameEngine';
+import { GAME_ID, useGameEngine } from '@/hooks/games/useGameEngine';
 import { useGameSettings } from '@/hooks/games/useGameSettings';
 import AboutModal from '@/components/games/meal-maker/AboutModal';
 import OptionsModal from '@/components/games/meal-maker/OptionsModal';
@@ -36,6 +36,7 @@ import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/fonts';
 import { Spacing } from '@/constants/spacing';
 import { Radius } from '@/constants/radius';
+import { getPlaysToday, MAX_DAILY_PLAYS } from '@/services/gameDailyRewards';
 
 interface PlateZone {
   x: number;
@@ -71,6 +72,7 @@ export default function MealMakerScreen() {
   const [plateZone, setPlateZone] = useState<PlateZone | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [playsToday, setPlaysToday] = useState<number | null>(null);
   const plateWrapperRef = useRef<View>(null);
 
   // ─── Audio ───────────────────────────────────────────────────────────────────
@@ -118,7 +120,7 @@ export default function MealMakerScreen() {
       }
       const { sound } = await Audio.Sound.createAsync(
         require('../../../assets/audio/round-audio.mp3'),
-        { isLooping: false, shouldPlay: true, volume: volumeRef.current }
+        { isLooping: false, shouldPlay: true, volume: volumeRef.current / 2 }
       );
       roundSoundRef.current = sound;
       isRoundPlayingRef.current = true;
@@ -201,6 +203,15 @@ export default function MealMakerScreen() {
       playRoundMusic();
     }
   }, [gamePhase, playRoundMusic]);
+
+  // ─── Plays Remaining ─────────────────────────────────────────────
+  useEffect(() => {
+    const loadPlaysRemaining = async () => {
+      const remaining = await getPlaysToday(GAME_ID);
+      setPlaysToday(remaining);
+    }
+    loadPlaysRemaining();
+  }, [dailyReward])
 
   // ─── OS Back Button / Gesture ─────────────────────────────────────────────
   // When a round is active, the hardware back button returns to the start screen
@@ -306,21 +317,19 @@ export default function MealMakerScreen() {
               showsVerticalScrollIndicator={false}
             >
               <Image
-                source={require('../../../assets/images/nutriheros_logo.png')}
+                source={require('../../../assets/images/meal_maker_title.png')}
                 style={styles.heroImage}
                 resizeMode="contain"
               />
-
-              <Text style={styles.idleTitle}>Meal Maker</Text>
-              <Text style={styles.idleSubtitle}>Drag foods to build{'\n'}healthy meals!</Text>
 
               {highScore > 0 && (
                 <View style={styles.scoreCard}>
                   <View style={styles.scoreItem}>
                     <Star size={46} color="#F5A623" fill="#FFD15C" />
+                    <Text style={styles.scoreLabel}>BEST SCORE</Text>
                     <View>
-                      <Text style={styles.scoreLabel}>BEST SCORE</Text>
                       <Text style={styles.scoreValue}>{highScore}</Text>
+                      <Text>Scoring Games: {playsToday}/{MAX_DAILY_PLAYS}</Text>
                     </View>
                   </View>
                 </View>
@@ -343,7 +352,6 @@ export default function MealMakerScreen() {
                   activeOpacity={0.8}
                 >
                   <BookOpen size={20} color={Colors.outline} />
-                  <Text style={styles.aboutButtonText}>How to Play</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -352,7 +360,6 @@ export default function MealMakerScreen() {
                   activeOpacity={0.8}
                 >
                   <Settings size={20} color={Colors.outline} />
-                  <Text style={styles.aboutButtonText}>Options</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.aboutButton} onPress={handleBack} activeOpacity={0.85}>
@@ -453,8 +460,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   heroImage: {
-    height: 160,
+    height: 360,
     marginTop: Spacing.md,
+    marginBottom: -Spacing.lg
   },
   idleTitle: {
     ...Typography.displaySmall,
@@ -473,7 +481,7 @@ const styles = StyleSheet.create({
   scoreCard: {
     width: '100%',
     maxWidth: 390,
-    minHeight: 96,
+    minHeight: 80,
     borderRadius: 24,
     backgroundColor: '#F7F1E6',
     flexDirection: 'row',
@@ -512,7 +520,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.lg,
-    marginVertical: Spacing.md,
+    marginVertical: Spacing.xs,
     shadowColor: '#7A2204',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.25,
@@ -537,7 +545,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     borderRadius: Radius.full,
     borderWidth: Spacing.xs,
     borderColor: Colors.outline,
