@@ -8,7 +8,7 @@ For this project, pair programming is used to improve code quality, share techni
 
 ## Project Context
 
-NutriHeroes is a mobile nutrition application for children aged 7-12. The project includes:
+Nutriheros is a mobile nutrition application for children aged 7-12. The project includes:
 
 - An Expo React Native mobile application
 - A FastAPI backend service
@@ -74,7 +74,7 @@ Roles should rotate during longer sessions or across different tasks. A recommen
 
 ## Areas Suitable for Pair Programming
 
-The following parts of NutriHeroes are especially suitable for pair programming:
+The following parts of Nutriheros are especially suitable for pair programming:
 
 - Food scanning flow (frontend → backend → result display)
 - Backend `/scan` endpoint and frontend API integration
@@ -117,6 +117,6 @@ When submitting pair programming evidence, the team can include:
 
 ## Reflection
 
-Pair programming supported this project by helping the team connect implementation decisions with the target users: children aged 7-12. Since NutriHeroes depends on both technical correctness and child-friendly interaction design, pairing helped catch problems earlier.
+Pair programming supported this project by helping the team connect implementation decisions with the target users: children aged 7-12. Since Nutriheros depends on both technical correctness and child-friendly interaction design, pairing helped catch problems earlier.
 
 The practice is especially useful for features where multiple parts of the system interact, such as scanning food, receiving backend analysis, displaying health feedback, and recommending alternatives.

@@ -306,7 +306,7 @@ export default function MealMakerScreen() {
               showsVerticalScrollIndicator={false}
             >
               <Image
-                source={require('../../../assets/images/nutriheroes_logo.png')}
+                source={require('../../../assets/images/nutriheros_logo.png')}
                 style={styles.heroImage}
                 resizeMode="contain"
               />

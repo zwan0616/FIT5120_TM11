@@ -41,7 +41,7 @@ const TASK_IMAGES: Record<string, any> = {
   "Early Rest, Sweet Dreams": require("../../../assets/images/early_rest,_sweet_dreams.png"),
 };
 
-const DEFAULT_IMAGE = require("../../../assets/images/nutriheroes_icon.png");
+const DEFAULT_IMAGE = require("../../../assets/images/nutriheros_icon.png");
 const DAILY_CHALLENGE_EXP = 50;
 
 export default function DailyChallengeScreen() {

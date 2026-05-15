@@ -1,6 +1,6 @@
-# NutriHeroes
+# Nutriheros
 
-NutriHeroes is a child-friendly mobile nutrition application designed to help children aged 7-12 build healthier eating habits through food scanning, personalised recommendations, educational stories, and small daily challenges. The app turns nutrition guidance into a playful superhero-themed experience so children can learn what foods support goals such as stronger muscles, better focus, good mood, clear vision, and overall wellbeing.
+Nutriheros is a child-friendly mobile nutrition application designed to help children aged 7-12 build healthier eating habits through food scanning, personalised recommendations, educational stories, and small daily challenges. The app turns nutrition guidance into a playful superhero-themed experience so children can learn what foods support goals such as stronger muscles, better focus, good mood, clear vision, and overall wellbeing.
 
 The project includes an Expo React Native mobile app and a FastAPI backend. The mobile app provides the user interface, profile management, camera-based food scanning flow, goal-based food recommendations, stories, and mini-games. The backend supports food image analysis, nutrition assessment, healthier alternative suggestions, daily challenge data, and integration with a PostgreSQL food catalogue.
 
@@ -147,4 +147,4 @@ npm run lint       # Run Expo linting
 
 ## Project Purpose
 
-NutriHeroes aims to make nutrition education more approachable for children by combining practical food analysis with playful learning. Instead of presenting nutrition as complex medical information, the app uses simple language, visual feedback, goals, rewards, and interactive activities to help children understand food choices and develop healthier habits over time.
+Nutriheros aims to make nutrition education more approachable for children by combining practical food analysis with playful learning. Instead of presenting nutrition as complex medical information, the app uses simple language, visual feedback, goals, rewards, and interactive activities to help children understand food choices and develop healthier habits over time.

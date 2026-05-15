@@ -27,7 +27,7 @@ const CARD_SPACING = (width - CARD_WIDTH) / 2;
 const AUTO_SCROLL_INTERVAL = 5000;
 
 // Local mascot image used for the bottom reading helper area.
-const readingMascot = require('../../../assets/images/nutriheroes_reading.png');
+const readingMascot = require('../../../assets/images/nutriheros_reading.png');
 
 interface Story {
   id: string;

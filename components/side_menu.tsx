@@ -84,7 +84,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
           ]}
         >
           <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>NutriHeroes</Text>
+            <Text style={styles.headerTitle}>Nutriheros</Text>
 
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <X size={20} color="#B45309" />

@@ -1,4 +1,4 @@
-package com.anonymous.NutriHeroes
+package com.anonymous.Nutriheros
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

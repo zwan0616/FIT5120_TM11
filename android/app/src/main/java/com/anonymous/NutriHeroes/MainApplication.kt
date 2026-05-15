@@ -1,4 +1,4 @@
-package com.anonymous.NutriHeroes
+package com.anonymous.Nutriheros
 
 import android.app.Application
 import android.content.res.Configuration

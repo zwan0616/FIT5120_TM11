@@ -322,7 +322,7 @@ export default function GoalScreen() {
     <View style={[styles.container_outer, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Shared app header with menu button */}
-        <AppHeader title={selectedGoalId ? selectedGoal?.title : 'NutriHeroes'} />
+        <AppHeader title={selectedGoalId ? selectedGoal?.title : 'Nutriheros'} />
 
         {/* Content */}
         {selectedGoalId ? renderGoalDetail() : renderGoalList()}
