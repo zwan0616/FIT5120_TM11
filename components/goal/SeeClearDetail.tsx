@@ -9,7 +9,7 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { ArrowRight, Star, ArrowLeft, Map } from 'lucide-react-native';
+import { ArrowRight, Star, ArrowLeft } from 'lucide-react-native';
 import type { Goal } from './types';
 import type { RecommendationResponse, FoodItem } from '../../services/recommendations';
 import { useRouter } from 'expo-router';
@@ -28,14 +28,6 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
   const router = useRouter();
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
-  const handleFoodQuestPress = (foodName: string) => {
-    // Navigate to food quest map with the food name
-    router.push({
-      pathname: '/food-quest-map' as any,
-      params: { foodName },
-    });
-  };
 
   const handleSmallCardPress = (food: FoodItem) => {
     setSelectedFood(food);
@@ -44,7 +36,7 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
 
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
-    description: `${f.grade}`,
+    description: `Grade ${f.grade}`,
     image: f.image_url,
   })) ?? goal.superFoods;
 
@@ -110,17 +102,6 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
                   <View style={[styles.mainImageContainer, { height: 100 }]}>
                     <Image source={{ uri: food.image }} style={styles.mainImage} resizeMode="cover" />
                   </View>
-                  <TouchableOpacity 
-                    style={styles.questButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      handleFoodQuestPress(food.name);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Map color="#2E7D32" size={16} />
-                    <Text style={styles.questButtonText}>Find This Food</Text>
-                  </TouchableOpacity>
                 </TouchableOpacity>
               );
             })}
@@ -141,7 +122,12 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
           ) : (
             <View style={styles.grid}>
               {tinyHeroFoods.map((food) => (
-                <View key={food.cn_code} style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0', padding: 16 }]}>
+                <TouchableOpacity
+                  key={food.cn_code}
+                  style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#9C27B0', padding: 16 }]}
+                  onPress={() => handleSmallCardPress(food)}
+                  activeOpacity={0.7}
+                >
                   <View style={styles.cardHeader}>
                     <View style={[styles.badge, { backgroundColor: '#9C27B0' }]}>
                       <Text style={styles.badgeText}>HERO CHALLENGE</Text>
@@ -151,7 +137,7 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
                   <View style={[styles.mainImageContainer, { height: 100 }]}>
                     <Image source={{ uri: food.image_url }} style={styles.mainImage} resizeMode="cover" />
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -202,7 +188,7 @@ export default function SeeClearDetail({ goal, onBack, recommendations, recLoadi
         visible={modalVisible}
         food={selectedFood ? {
           name: selectedFood.name,
-          description: '',
+          description: `Grade ${selectedFood.grade}`,
           image: selectedFood.image_url,
           explanation: selectedFood.reason,
           cn_code: selectedFood.cn_code,
