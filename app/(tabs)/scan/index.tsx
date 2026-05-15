@@ -41,7 +41,7 @@ export default function ScanScreen() {
         {/* Mascot / banner section */}
         <View style={styles.bannerContainer}>
           <Image
-            source={require('../../../assets/images/nutriheroes_icon.png')}
+            source={require('../../../assets/images/nutriheros_icon.png')}
             style={styles.teamImage}
             resizeMode="contain"
           />

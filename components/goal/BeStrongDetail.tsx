@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -9,9 +9,11 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { ArrowRight, Star, ArrowLeft } from 'lucide-react-native';
+import { ArrowRight, Star, ArrowLeft, Map } from 'lucide-react-native';
 import type { Goal } from './types';
-import type { RecommendationResponse } from '../../services/recommendations';
+import type { RecommendationResponse, FoodItem } from '../../services/recommendations';
+import { useRouter } from 'expo-router';
+import FoodDetailModal from './FoodDetailModal';
 
 const { width } = Dimensions.get('window');
 
@@ -23,9 +25,26 @@ interface Props {
 }
 
 export default function BeStrongDetail({ goal, onBack, recommendations, recLoading }: Props) {
+  const router = useRouter();
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const handleFoodQuestPress = (foodName: string) => {
+    // Navigate to food quest map with the food name
+    router.push({
+      pathname: '/food-quest-map' as any,
+      params: { foodName },
+    });
+  };
+
+  const handleSmallCardPress = (food: FoodItem) => {
+    setSelectedFood(food);
+    setModalVisible(true);
+  };
+
   const displaySuperFoods = recommendations?.super_power_foods?.map(f => ({
     name: f.name,
-    description: `Grade ${f.grade}`,
+    description: `${f.grade}`,
     image: f.image_url,
   })) ?? goal.superFoods;
 
@@ -35,6 +54,10 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
 
   const tinyHeroFoods = recommendations?.tiny_hero_foods ?? [];
   const tryLessFoods = recommendations?.try_less_foods ?? [];
+
+  // Get full food items for small cards (with explanation data)
+  const sf1Full = recommendations?.super_power_foods?.[1] ?? null;
+  const sf2Full = recommendations?.super_power_foods?.[2] ?? null;
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Custom Back Button */}
@@ -61,36 +84,46 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
           <ActivityIndicator color="#3F51B5" size="large" style={{ marginVertical: 24 }} />
         ) : (
           <View style={styles.grid}>
-            {/* Main Card */}
-            <View style={styles.mainCard}>
-              <View style={styles.cardHeader}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>GOOD CHOICE</Text>
-                </View>
-                <Text style={styles.foodNameLarge}>{sf0.name}</Text>
-              </View>
-              <View style={styles.mainImageContainer}>
-                <Image source={{ uri: sf0.image }} style={styles.mainImage} resizeMode="cover" />
-              </View>
-              <Text style={styles.descriptionText}>{sf0.description}</Text>
-            </View>
-
-            {/* Row of smaller cards */}
-            <View style={styles.row}>
-              <View style={styles.smallCard}>
-                <View style={styles.smallImageContainer}>
-                  <Image source={{ uri: sf1.image }} style={styles.smallImage} resizeMode="contain" />
-                </View>
-                <Text style={styles.foodNameSmall}>{sf1.name}</Text>
-              </View>
-
-              <View style={styles.smallCard}>
-                <View style={styles.smallImageContainer}>
-                  <Image source={{ uri: sf2.image }} style={styles.smallImage} resizeMode="contain" />
-                </View>
-                <Text style={styles.foodNameSmall}>{sf2.name}</Text>
-              </View>
-            </View>
+            {displaySuperFoods.map((food, index) => {
+              const fullFood = recommendations?.super_power_foods?.[index] ?? null;
+              return (
+                <TouchableOpacity
+                  key={food.name}
+                  style={[styles.mainCard, { borderLeftWidth: 4, borderLeftColor: '#4CAF50', padding: 16 }]}
+                  onPress={() => handleSmallCardPress({
+                    name: food.name,
+                    image_url: food.image,
+                    grade: '',
+                    reason: '',
+                    cn_code: '',
+                    category: '',
+                    ...fullFood,
+                  })}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={[styles.badge, { backgroundColor: '#4CAF50' }]}>
+                      <Text style={styles.badgeText}>GOOD CHOICE</Text>
+                    </View>
+                    <Text style={styles.foodNameLarge}>{food.name}</Text>
+                  </View>
+                  <View style={[styles.mainImageContainer, { height: 100 }]}>
+                    <Image source={{ uri: food.image }} style={styles.mainImage} resizeMode="cover" />
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.questButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleFoodQuestPress(food.name);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Map color="#2E7D32" size={16} />
+                    <Text style={styles.questButtonText}>Find This Food</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </View>
@@ -138,16 +171,11 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
         ) : tryLessFoods.length > 0 ? (
           <View style={styles.grid}>
             {tryLessFoods.map((food) => (
-              <View key={food.cn_code} style={[styles.smallCard, { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 }]}>
-                <View style={[styles.smallImageContainer, { width: 64, height: 64 }]}>
-                  <Image source={{ uri: food.image_url }} style={[styles.smallImage, { opacity: 0.7 }]} resizeMode="contain" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.foodNameSmall}>{food.name}</Text>
-                  <View style={[styles.badge, { backgroundColor: '#FFCCBC', marginTop: 4 }]}>
-                    <Text style={[styles.badgeText, { color: '#BF360C' }]}>EAT LESS</Text>
-                  </View>
-                </View>
+              <View key={food.cn_code} style={[styles.tryLessItemCard, { padding: 16 }]}>
+                <Text style={styles.tryLessFoodName}>{food.name}</Text>
+                {food.reason && (
+                  <Text style={styles.tryLessExplanation}>{food.reason}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -168,6 +196,20 @@ export default function BeStrongDetail({ goal, onBack, recommendations, recLoadi
           </View>
         )}
       </View>
+
+      {/* Food Detail Modal */}
+      <FoodDetailModal
+        visible={modalVisible}
+        food={selectedFood ? {
+          name: selectedFood.name,
+          description: '',
+          image: selectedFood.image_url,
+          explanation: selectedFood.reason,
+          cn_code: selectedFood.cn_code,
+          category: selectedFood.category,
+        } : null}
+        onClose={() => setModalVisible(false)}
+      />
     </ScrollView>
   );
 }
@@ -341,6 +383,29 @@ const styles = StyleSheet.create({
     color: '#36392c',
     textAlign: 'center',
   },
+  tryLessItemCard: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  tryLessFoodName: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#36392c',
+    textAlign: 'left',
+  },
+  tryLessExplanation: {
+    fontSize: 14,
+    color: '#BF360C',
+    fontWeight: '600',
+    marginTop: 8,
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
   tryLessCard: {
     backgroundColor: '#fff',
     borderRadius: 24,
@@ -405,5 +470,39 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 24,
+  },
+  questButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  questButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2E7D32',
+  },
+  questButtonSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+    alignSelf: 'center',
+  },
+  questButtonTextSmall: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#2E7D32',
   },
 });

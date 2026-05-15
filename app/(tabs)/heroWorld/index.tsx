@@ -85,7 +85,7 @@ export default function HeroWorldScreen() {
         <AppHeader/>
 
         <Image
-          source={require('../../../assets/images/nutriheroes_logo_tight.png')}
+          source={require('../../../assets/images/nutriheros_logo_tight.png')}
           style={styles.bannerImage}
           resizeMode='contain'
         />

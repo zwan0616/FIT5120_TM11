@@ -9,7 +9,7 @@ type AppHeaderProps = {
 };
 
 export default function AppHeader({
-  title = 'NutriHeroes',
+  title = 'Nutriheros',
 }: AppHeaderProps) {
   const [menuVisible, setMenuVisible] = useState(false);
 

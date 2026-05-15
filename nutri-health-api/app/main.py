@@ -6,8 +6,10 @@ FastAPI backend for food scanning and nutritional analysis
 import os
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.load_env import ensure_dotenv_loaded
 
@@ -16,6 +18,7 @@ ensure_dotenv_loaded()
 from app.database import init_db
 from app.database import SessionLocal
 from app.routers import scan, auth, stories, daily_challenge, recommendations
+from app.routers import reason
 from app.services.seed import (
     has_seed_been_initialized,
     mark_seed_initialized,
@@ -92,12 +95,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Serve static files (food photos, generated images, category fallbacks)
+_STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+
 # Register routers
 app.include_router(auth.router)
 app.include_router(scan.router)
 app.include_router(stories.router)
 app.include_router(daily_challenge.router)
 app.include_router(recommendations.router)
+app.include_router(reason.router)
 
 
 @app.get("/", tags=["root"])

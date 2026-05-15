@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "NutriHeroes",
-    "slug": "NutriHeroes",
+    "name": "Nutriheros",
+    "slug": "Nutriheros",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/nutriheroes_icon.png",
+    "icon": "./assets/images/nutriheros_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F6F8EC",
-        "foregroundImage": "./assets/images/nutriheroes_logo.png"
+        "foregroundImage": "./assets/images/nutriheros_logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -24,18 +24,24 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.anonymous.NutriHeroes"
+      "package": "com.anonymous.Nutriheros"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/nutriheroes_logo.png"
+      "favicon": "./assets/images/nutriheros_logo.png"
     },
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Nutriheros needs your location to find nearby stores where you can buy healthy food."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
-          "image": "./assets/images/nutriheroes_icon.png",
+          "image": "./assets/images/nutriheros_icon.png",
           "imageWidth": 220,
           "resizeMode": "contain",
           "backgroundColor": "#F6F8EC",
@@ -43,7 +49,7 @@
             "backgroundColor": "#F6F8EC"
           }
         }
-      ],
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
