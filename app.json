@@ -4,7 +4,7 @@
     "slug": "Nutriheros",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/nutriheros_icon.png",
+    "icon": "./assets/images/NutriHeros_app_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F6F8EC",
-        "foregroundImage": "./assets/images/nutriheros_logo.png"
+        "foregroundImage": "./assets/images/NutriHeros_app_icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -28,7 +28,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/nutriheros_logo.png"
+      "favicon": "./assets/images/NutriHeros_app_icon.png"
     },
     "plugins": [
       "expo-router",
@@ -41,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/nutriheros_icon.png",
+          "image": "./assets/images/NutriHeros_app_icon.png",
           "imageWidth": 220,
           "resizeMode": "contain",
           "backgroundColor": "#F6F8EC",
