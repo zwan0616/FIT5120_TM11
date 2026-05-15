@@ -6,6 +6,7 @@ import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   ScrollView,
   StyleSheet,
   Text,
@@ -52,6 +53,8 @@ export default function StoryReaderScreen() {
   const soundRef = useRef<Audio.Sound | null>(null);
   const pageHeightsRef = useRef<number[]>([]);
   const isAutoScrollingRef = useRef(false);
+  const pulseScale = useRef(new Animated.Value(1)).current;
+  const pulseAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const loadStory = async () => {
     setLoading(true);
@@ -140,6 +143,25 @@ export default function StoryReaderScreen() {
       // Speech.stop();
     };
   }, []);
+
+  // Pulse animation: start when idle/error, stop when playing/loading
+  useEffect(() => {
+    if (audioState === 'idle') {
+      pulseAnimationRef.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseScale, { toValue: 1.08, duration: 400, useNativeDriver: true }),
+          Animated.timing(pulseScale, { toValue: 1, duration: 400, useNativeDriver: true }),
+        ])
+      );
+      pulseAnimationRef.current.start();
+    } else {
+      if (pulseAnimationRef.current) {
+        pulseAnimationRef.current.stop();
+        pulseAnimationRef.current = null;
+      }
+      Animated.timing(pulseScale, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+    }
+  }, [audioState]);
 
   const playAudioForPage = async (pageNumber: number) => {
     try {
@@ -319,16 +341,18 @@ export default function StoryReaderScreen() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity
-              style={[styles.headerListenButton, { backgroundColor: '#E77A1F' }]}
-              onPress={handleListenPress}
-              disabled={audioState === 'loading'}
-            >
-              {iconForAudioState()}
-              <Text style={styles.headerListenButtonText}>
-                {audioState === 'playing' ? `Pause · ${currentPage + 1}` : `Listen · ${currentPage + 1}`}
-              </Text>
-            </TouchableOpacity>
+            <Animated.View style={{ transform: [{ scale: pulseScale }] }}>
+              <TouchableOpacity
+                style={[styles.headerListenButton, { backgroundColor: '#E77A1F' }]}
+                onPress={handleListenPress}
+                disabled={audioState === 'loading'}
+              >
+                {iconForAudioState()}
+                <Text style={styles.headerListenButtonText}>
+                  {audioState === 'playing' ? `Pause · ${currentPage + 1}` : `Listen · ${currentPage + 1}`}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           ),
           headerStyle: {
             backgroundColor: Colors.surface,
