@@ -77,13 +77,13 @@ export default function HeroWorldScreen() {
         <AppHeader/>
 
         <Image
-          source={require('../../../assets/images/nutriheros_logo_tight.png')}
+          source={require('../../../assets/images/hero_world.png')}
           style={styles.bannerImage}
           resizeMode='contain'
         />
-        <View style={styles.bannerTextContainer}>
+        {/* <View style={styles.bannerTextContainer}>
           <Text style={styles.bannerText}>🌎 Hero World</Text>
-        </View>
+        </View> */}
 
         {/* Daily Challenge */}
         <TouchableOpacity 
@@ -142,8 +142,9 @@ const styles = StyleSheet.create({
   },
   bannerImage: {
     alignSelf: 'center',
-    width: '80%',
-    height: '30%',
+    width: '100%',
+    height: '40%',
+    marginBottom: -Spacing.xl,
   },
   bannerTextContainer: {
     position: 'relative',

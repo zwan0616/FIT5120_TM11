@@ -39,17 +39,17 @@ export default function ScanScreen() {
         <AppHeader />
 
         {/* Mascot / banner section */}
-        <View style={styles.bannerContainer}>
+        {/* <View style={styles.bannerContainer}> */}
           <Image
-            source={require('../../../assets/images/nutriheros_icon.png')}
+            source={require('../../../assets/images/hero_vision.png')}
             style={styles.teamImage}
             resizeMode="contain"
           />
 
-          <View style={styles.missionBadge}>
+          {/* <View style={styles.missionBadge}>
             <Text style={styles.missionText}>MISSION: BECOME A HERO!</Text>
-          </View>
-        </View>
+          </View> */}
+        {/* </View> */}
 
         {/* Main card that explains how the scan flow works */}
         <View style={styles.mainCard}>
@@ -137,13 +137,13 @@ const styles = StyleSheet.create({
     // flexGrow: 1,
   },
   bannerContainer: {
-    alignItems: 'center',
-    marginBottom: 18,
+    // alignItems: 'center',
+    marginBottom: -18,
   },
   teamImage: {
-    width: 260,
-    height: 140,
-    marginBottom: 8,
+    width: '100%',
+    height: 220,
+    marginBottom: -Spacing['2xl'],
   },
   missionBadge: {
     backgroundColor: '#FFFFFF',
