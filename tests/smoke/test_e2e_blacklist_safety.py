@@ -17,7 +17,7 @@ Mock lists use 4 items per section (matching _CANDIDATES_WITH_FILTER=4
 for blacklist/allergy cases).
 
 Run:
-    .venv/bin/python3 scripts/test_e2e_blacklist_safety.py
+    .venv/bin/python3 tests/smoke/test_e2e_blacklist_safety.py
 """
 from __future__ import annotations
 
@@ -25,7 +25,9 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.services.recommendation import (
     parse_model_output,

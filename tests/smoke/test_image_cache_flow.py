@@ -4,8 +4,8 @@ Image cache flow test.
 Validates the image caching pipeline without making a full API request.
 
 Usage:
-    /usr/bin/python3 scripts/test_image_cache_flow.py
-    /usr/bin/python3 scripts/test_image_cache_flow.py --run-generation
+    /usr/bin/python3 tests/smoke/test_image_cache_flow.py
+    /usr/bin/python3 tests/smoke/test_image_cache_flow.py --run-generation
 """
 
 from __future__ import annotations
@@ -13,7 +13,9 @@ from __future__ import annotations
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 RUN_GENERATION = "--run-generation" in sys.argv
 

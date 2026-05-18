@@ -13,14 +13,16 @@ Dynamic candidate count tests:
   - 4-item output  (blacklist/allergies present → _llm_candidate_count returns 4)
 
 Run:
-    .venv/bin/python3 scripts/test_parser.py
+    .venv/bin/python3 tests/smoke/test_parser.py
 """
 from __future__ import annotations
 import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.services.recommendation import (
     parse_model_output,

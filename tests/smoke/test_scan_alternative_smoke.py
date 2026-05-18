@@ -3,7 +3,7 @@ Step 1 — Smoke test: verify the fine-tuned model follows the new
 alternative_generation schema (alternatives list + alternative_reason).
 
 Run:
-    /usr/bin/python3 scripts/test_scan_alternative_smoke.py
+    /usr/bin/python3 tests/smoke/test_scan_alternative_smoke.py
 
 Prints raw model output for each test food so you can judge:
   - Does the model output "alternatives" as a list (not "better_alternative")?
@@ -20,7 +20,9 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.load_env import ensure_dotenv_loaded
 ensure_dotenv_loaded()

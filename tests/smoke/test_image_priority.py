@@ -14,7 +14,7 @@ Test sections:
      generation IS queued for foods not in metadata
 
 Run:
-    .venv/bin/python3 scripts/test_image_priority.py
+    .venv/bin/python3 tests/smoke/test_image_priority.py
 """
 from __future__ import annotations
 
@@ -22,7 +22,9 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.services.enrichment import enrich_recommendation_items
 from app.services.food_image_cache import _build_pollinations_url, _IMAGE_WIDTH, _IMAGE_HEIGHT

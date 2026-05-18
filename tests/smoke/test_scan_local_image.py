@@ -5,8 +5,8 @@
 依赖：仅标准库（urllib / json / os）。
 
 用法:
-  python3 scripts/test_scan_local_image.py
-  python3 scripts/test_scan_local_image.py /path/to/photo.jpg
+  python3 tests/smoke/test_scan_local_image.py
+  python3 tests/smoke/test_scan_local_image.py /path/to/photo.jpg
 
 环境变量:
   BASE_URL  默认 http://127.0.0.1:8000

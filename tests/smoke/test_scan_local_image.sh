@@ -10,9 +10,9 @@
 # 4. 若命中 scan 缓存，会直接返回旧 JSON，不会重新算 alternatives；测试前可用 clear_scan_cache.sh 清缓存。
 #
 # 用法:
-#   chmod +x scripts/test_scan_local_image.sh
-#   ./scripts/test_scan_local_image.sh
-#   ./scripts/test_scan_local_image.sh /path/to/photo.jpg
+#   chmod +x tests/smoke/test_scan_local_image.sh
+#   ./tests/smoke/test_scan_local_image.sh
+#   ./tests/smoke/test_scan_local_image.sh /path/to/photo.jpg
 #
 # 环境变量:
 #   BASE_URL  默认 http://127.0.0.1:8000

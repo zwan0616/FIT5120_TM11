@@ -5,12 +5,14 @@ Proves that resolve_forbidden + is_item_forbidden correctly blocks foods
 by category and keyword, not just literal string match.
 
 Run:
-    .venv/bin/python3 scripts/test_canonical_blacklist.py
+    .venv/bin/python3 tests/smoke/test_canonical_blacklist.py
 """
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.services.filter import resolve_forbidden, is_item_forbidden, filter_output, filter_candidates
 

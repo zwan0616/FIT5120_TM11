@@ -16,7 +16,7 @@ Covers:
   12. metadata_entry_count() returns positive value
 
 Run:
-    .venv/bin/python3 scripts/test_image_lookup.py
+    .venv/bin/python3 tests/smoke/test_image_lookup.py
 """
 from __future__ import annotations
 
@@ -26,7 +26,9 @@ import re
 from pathlib import Path
 from unittest.mock import patch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 SEP = "=" * 65
 failures: list[str] = []

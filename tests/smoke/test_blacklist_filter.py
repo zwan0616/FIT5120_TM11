@@ -7,12 +7,14 @@ Verifies:
 3. Alternatives are still returned (not empty) after filtering
 
 Run:
-    .venv/bin/python3 scripts/test_blacklist_filter.py
+    .venv/bin/python3 tests/smoke/test_blacklist_filter.py
 """
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.load_env import ensure_dotenv_loaded
 ensure_dotenv_loaded()

@@ -2,9 +2,9 @@
 Smoke test for fine-tuned OpenAI food recommendation model.
 
 Usage:
-    python scripts/test_finetuned_model_smoke.py
-    python scripts/test_finetuned_model_smoke.py --model ft:gpt-4o-mini-2024-07-18:personal::DbryXUZ2
-    python scripts/test_finetuned_model_smoke.py --temperature 0.3 --top-p 0.9
+    python tests/smoke/test_finetuned_model_smoke.py
+    python tests/smoke/test_finetuned_model_smoke.py --model ft:gpt-4o-mini-2024-07-18:personal::DbryXUZ2
+    python tests/smoke/test_finetuned_model_smoke.py --temperature 0.3 --top-p 0.9
 """
 
 import argparse
@@ -13,7 +13,7 @@ import os
 import sys
 from pathlib import Path
 
-# Allow running from project root or scripts/
+# Allow running from project root or tests/smoke/
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 

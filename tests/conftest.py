@@ -2,7 +2,8 @@
 Add the project root to sys.path so that `app.*` imports resolve
 when running pytest from the nutri-health-api/ directory.
 """
-import sys
 import os
+import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "nutri-health-api"))
+sys.path.insert(0, BACKEND_ROOT)

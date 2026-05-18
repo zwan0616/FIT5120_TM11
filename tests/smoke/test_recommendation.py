@@ -11,12 +11,14 @@ Verifies for every goal:
 5. Blacklist terms are absent from all results
 
 Run:
-    .venv/bin/python3 scripts/test_recommendation.py
+    .venv/bin/python3 tests/smoke/test_recommendation.py
 """
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.load_env import ensure_dotenv_loaded
 ensure_dotenv_loaded()

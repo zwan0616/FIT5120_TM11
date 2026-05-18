@@ -16,7 +16,7 @@ Sections:
   12. Unknown section_name falls back gracefully (no crash)
 
 Run:
-    .venv/bin/python3 scripts/test_reason.py
+    .venv/bin/python3 tests/smoke/test_reason.py
 """
 from __future__ import annotations
 
@@ -24,7 +24,9 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'nutri-health-api'))
+
+sys.path.insert(0, ROOT)
 
 from app.services.reason_builder import (
     BANNED_WORDS,
