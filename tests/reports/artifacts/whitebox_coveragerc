@@ -1,7 +1,0 @@
-[run]
-omit =
-    /home/runner/work/FIT5120_TM11/FIT5120_TM11/nutri-health-api/app/etl/*
-    /home/runner/work/FIT5120_TM11/FIT5120_TM11/nutri-health-api/app/config/vision_llm.py
-    /home/runner/work/FIT5120_TM11/FIT5120_TM11/nutri-health-api/app/services/gemini.py
-    /home/runner/work/FIT5120_TM11/FIT5120_TM11/nutri-health-api/app/services/embedding_provider.py
-    /home/runner/work/FIT5120_TM11/FIT5120_TM11/nutri-health-api/app/services/rag_service.py
