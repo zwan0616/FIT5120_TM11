@@ -403,7 +403,7 @@ class TestBatchDisplayRewrite:
 
         with patch(
             "app.services.recommendation_service.batch_rewrite_display_names",
-            return_value={1: "Whole Milk"},
+            return_value={1: ("Whole Milk", "whole_milk")},
         ) as mock_rewrite:
             result = _apply_batch_display_rewrite(db, "grow", response)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -31,9 +32,8 @@ def _recognised_payload(food_name: str = "Apple", score: int = 3) -> dict:
     }
 
 
-@pytest.mark.asyncio
-async def test_scan_rejects_invalid_file_type() -> None:
-    with pytest.raises(HTTPException) as exc_info:
+def test_scan_rejects_invalid_file_type() -> None:
+    async def _run() -> None:
         await scan_router.scan_food(
             file=DummyUploadFile(b"png-bytes", "text/plain"),
             blacklist="[]",
@@ -43,12 +43,14 @@ async def test_scan_rejects_invalid_file_type() -> None:
             current_user={"username": "demo"},
         )
 
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(_run())
+
     assert exc_info.value.status_code == 400
     assert exc_info.value.headers["X-Error-Code"] == "INVALID_FILE"
 
 
-@pytest.mark.asyncio
-async def test_scan_returns_cached_result_without_vision_call(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_returns_cached_result_without_vision_call(monkeypatch: pytest.MonkeyPatch) -> None:
     cached_result = {
         "recognised": True,
         "confidence": 0.99,
@@ -63,7 +65,8 @@ async def test_scan_returns_cached_result_without_vision_call(monkeypatch: pytes
     monkeypatch.setattr(scan_router, "get_cached_result", MagicMock(return_value=cached_result))
     monkeypatch.setattr(scan_router.gemini_service, "analyze_food_image", AsyncMock())
 
-    result = await scan_router.scan_food(
+    async def _run():
+        return await scan_router.scan_food(
         file=DummyUploadFile(b"image-bytes"),
         blacklist="[]",
         likes="[]",
@@ -72,13 +75,14 @@ async def test_scan_returns_cached_result_without_vision_call(monkeypatch: pytes
         current_user={"username": "demo"},
     )
 
+    result = asyncio.run(_run())
+
     assert result.food_name == "Apple"
     assert result.assessment_score == 3
     scan_router.gemini_service.analyze_food_image.assert_not_awaited()
 
 
-@pytest.mark.asyncio
-async def test_scan_rejects_non_food_results(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_rejects_non_food_results(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(scan_router, "hash_image", MagicMock(return_value="image-hash"))
     monkeypatch.setattr(scan_router, "get_cached_result", MagicMock(return_value=None))
     monkeypatch.setattr(
@@ -95,7 +99,7 @@ async def test_scan_rejects_non_food_results(monkeypatch: pytest.MonkeyPatch) ->
         ),
     )
 
-    with pytest.raises(HTTPException) as exc_info:
+    async def _run() -> None:
         await scan_router.scan_food(
             file=DummyUploadFile(b"image-bytes"),
             blacklist="[]",
@@ -105,12 +109,14 @@ async def test_scan_rejects_non_food_results(monkeypatch: pytest.MonkeyPatch) ->
             current_user={"username": "demo"},
         )
 
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(_run())
+
     assert exc_info.value.status_code == 400
     assert exc_info.value.headers["X-Error-Code"] == "NOT_FOOD"
 
 
-@pytest.mark.asyncio
-async def test_scan_happy_path_caches_healthy_results(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_happy_path_caches_healthy_results(monkeypatch: pytest.MonkeyPatch) -> None:
     cache_result = MagicMock(return_value=True)
     analyze = AsyncMock(return_value=_recognised_payload(score=3))
     score = MagicMock(
@@ -131,7 +137,8 @@ async def test_scan_happy_path_caches_healthy_results(monkeypatch: pytest.Monkey
     monkeypatch.setattr(scan_router, "cache_result", cache_result)
     monkeypatch.setattr(scan_router, "get_scan_alternatives", MagicMock())
 
-    result = await scan_router.scan_food(
+    async def _run():
+        return await scan_router.scan_food(
         file=DummyUploadFile(b"image-bytes"),
         blacklist="[]",
         likes="[]",
@@ -140,6 +147,8 @@ async def test_scan_happy_path_caches_healthy_results(monkeypatch: pytest.Monkey
         current_user={"username": "demo"},
     )
 
+    result = asyncio.run(_run())
+
     assert result.recognised is True
     assert result.assessment_score == 3
     assert result.alternatives == []
@@ -147,8 +156,7 @@ async def test_scan_happy_path_caches_healthy_results(monkeypatch: pytest.Monkey
     scan_router.get_scan_alternatives.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_scan_generates_alternatives_for_lower_scores(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_scan_generates_alternatives_for_lower_scores(monkeypatch: pytest.MonkeyPatch) -> None:
     cache_result = MagicMock(return_value=True)
     analyze = AsyncMock(return_value=_recognised_payload(food_name="Chocolate cookie", score=1))
     score = MagicMock(
@@ -173,7 +181,8 @@ async def test_scan_generates_alternatives_for_lower_scores(monkeypatch: pytest.
     monkeypatch.setattr(scan_router, "cache_result", cache_result)
     monkeypatch.setattr(scan_router, "get_scan_alternatives", MagicMock(return_value=alternatives))
 
-    result = await scan_router.scan_food(
+    async def _run():
+        return await scan_router.scan_food(
         file=DummyUploadFile(b"image-bytes"),
         blacklist="[]",
         likes="[]",
@@ -181,6 +190,8 @@ async def test_scan_generates_alternatives_for_lower_scores(monkeypatch: pytest.
         db=MagicMock(),
         current_user={"username": "demo"},
     )
+
+    result = asyncio.run(_run())
 
     assert result.assessment_score == 1
     assert len(result.alternatives) == 2

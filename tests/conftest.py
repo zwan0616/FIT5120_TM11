@@ -9,4 +9,8 @@ BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "nu
 sys.path.insert(0, BACKEND_ROOT)
 
 # Avoid import-time failures when database.py requires DATABASE_URL.
-os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///:memory:")
+# Use a PostgreSQL-style URL so SQLAlchemy pool options are accepted.
+os.environ.setdefault(
+	"DATABASE_URL",
+	"postgresql+psycopg2://user:password@localhost:5432/nutrihealth",
+)

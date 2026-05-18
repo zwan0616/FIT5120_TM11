@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -38,8 +39,7 @@ def test_app_registers_core_routes() -> None:
     assert any(getattr(route, "path", None) == "/static" for route in main_module.app.routes)
 
 
-@pytest.mark.asyncio
-async def test_lifespan_initializes_database_without_seed(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lifespan_initializes_database_without_seed(monkeypatch: pytest.MonkeyPatch) -> None:
     init_db = MagicMock()
     session_factory = MagicMock(return_value=FakeSession())
 
@@ -50,8 +50,11 @@ async def test_lifespan_initializes_database_without_seed(monkeypatch: pytest.Mo
     monkeypatch.setattr(main_module, "mark_seed_initialized", MagicMock())
     monkeypatch.setenv("SEED_ON_STARTUP", "false")
 
-    async with main_module.lifespan(FastAPI()):
-        pass
+    async def _run() -> None:
+        async with main_module.lifespan(FastAPI()):
+            pass
+
+    asyncio.run(_run())
 
     init_db.assert_called_once()
     session_factory.assert_not_called()
@@ -60,8 +63,7 @@ async def test_lifespan_initializes_database_without_seed(monkeypatch: pytest.Mo
     main_module.mark_seed_initialized.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_lifespan_seeds_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lifespan_seeds_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     fake_db = FakeSession()
     init_db = MagicMock()
     session_factory = MagicMock(return_value=fake_db)
@@ -79,8 +81,11 @@ async def test_lifespan_seeds_when_enabled(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setenv("SEED_FORCE_RELOAD", "false")
     monkeypatch.setenv("SEED_TRUNCATE_BEFORE_LOAD", "true")
 
-    async with main_module.lifespan(FastAPI()):
-        pass
+    async def _run() -> None:
+        async with main_module.lifespan(FastAPI()):
+            pass
+
+    asyncio.run(_run())
 
     init_db.assert_called_once()
     session_factory.assert_called_once()
@@ -90,30 +95,34 @@ async def test_lifespan_seeds_when_enabled(monkeypatch: pytest.MonkeyPatch) -> N
     assert fake_db.closed is True
 
 
-@pytest.mark.asyncio
-async def test_root_and_health_endpoints() -> None:
-    assert await main_module.root() == {
+def test_root_and_health_endpoints() -> None:
+    async def _run() -> None:
+        assert await main_module.root() == {
         "name": "NutriHealth API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",
-    }
-    assert await main_module.health_check() == {
+        }
+        assert await main_module.health_check() == {
         "status": "healthy",
         "service": "nutrihealth-api",
-    }
+        }
+
+    asyncio.run(_run())
 
 
-@pytest.mark.asyncio
-async def test_cleanup_cache_endpoint_uses_session_and_cleanup(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cleanup_cache_endpoint_uses_session_and_cleanup(monkeypatch: pytest.MonkeyPatch) -> None:
     fake_db = FakeSession()
     session_factory = MagicMock(return_value=fake_db)
     cleanup = MagicMock(return_value=7)
 
-    monkeypatch.setattr(main_module, "SessionLocal", session_factory)
+    monkeypatch.setattr("app.database.SessionLocal", session_factory)
     monkeypatch.setattr("app.services.cache.cleanup_expired_cache", cleanup)
 
-    result = await main_module.cleanup_cache_endpoint()
+    async def _run() -> dict:
+        return await main_module.cleanup_cache_endpoint()
+
+    result = asyncio.run(_run())
 
     assert result == {"status": "success", "entries_deleted": 7}
     session_factory.assert_called_once()
@@ -129,27 +138,34 @@ def test_authenticate_user_and_token_roundtrip() -> None:
     assert auth_module.decode_access_token(token) == {"username": "demo"}
 
 
-@pytest.mark.asyncio
-async def test_get_current_user_rejects_invalid_token(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_current_user_rejects_invalid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(auth_module, "decode_access_token", MagicMock(return_value=None))
 
-    with pytest.raises(HTTPException) as exc_info:
+    async def _run() -> None:
         await auth_module.get_current_user("bad-token")
+
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(_run())
 
     assert exc_info.value.status_code == 401
 
 
-@pytest.mark.asyncio
-async def test_login_endpoint_success_and_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_login_endpoint_success_and_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(auth_router, "authenticate_user", MagicMock(return_value=True))
     monkeypatch.setattr(auth_router, "create_access_token", MagicMock(return_value="token-123"))
 
-    response = await auth_router.login(DummyFormData("demo", "demo123"))
+    async def _login_success() -> dict:
+        return await auth_router.login(DummyFormData("demo", "demo123"))
+
+    response = asyncio.run(_login_success())
     assert response == {"access_token": "token-123", "token_type": "bearer"}
 
     monkeypatch.setattr(auth_router, "authenticate_user", MagicMock(return_value=False))
 
+    async def _login_fail() -> dict:
+        return await auth_router.login(DummyFormData("demo", "wrong"))
+
     with pytest.raises(HTTPException) as exc_info:
-        await auth_router.login(DummyFormData("demo", "wrong"))
+        asyncio.run(_login_fail())
 
     assert exc_info.value.status_code == 401

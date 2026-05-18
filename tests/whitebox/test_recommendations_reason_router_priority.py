@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -22,8 +23,7 @@ def _enriched_item(food_id: str, food_name: str, category: str, reason: str = "B
     )
 
 
-@pytest.mark.asyncio
-async def test_reason_endpoint_uses_template_builder(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_reason_endpoint_uses_template_builder(monkeypatch: pytest.MonkeyPatch) -> None:
     captured = {}
 
     def fake_builder(**kwargs):
@@ -32,18 +32,21 @@ async def test_reason_endpoint_uses_template_builder(monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(reason_router, "build_personalized_reason", fake_builder)
 
-    response = await reason_router.get_reason(
-        payload=ReasonRequest(
-            food_name="Apple",
-            category="fruit",
-            section_name="super_power_foods",
-            goal_id="grow",
-            food_id="apple-1",
-            likes=["fruit"],
-            dislikes=["snack"],
-        ),
-        current_user={"username": "demo"},
-    )
+    async def _run():
+        return await reason_router.get_reason(
+            payload=ReasonRequest(
+                food_name="Apple",
+                category="fruit",
+                section_name="super_power_foods",
+                goal_id="grow",
+                food_id="apple-1",
+                likes=["fruit"],
+                dislikes=["snack"],
+            ),
+            current_user={"username": "demo"},
+        )
+
+    response = asyncio.run(_run())
 
     assert response.food_id == "apple-1"
     assert response.reason == "This food matches your goal."
@@ -52,8 +55,7 @@ async def test_reason_endpoint_uses_template_builder(monkeypatch: pytest.MonkeyP
     assert captured["section_name"] == "super_power_foods"
 
 
-@pytest.mark.asyncio
-async def test_recommendations_endpoint_returns_enriched_lists_and_queues_images(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_recommendations_endpoint_returns_enriched_lists_and_queues_images(monkeypatch: pytest.MonkeyPatch) -> None:
     payload = RecommendationRequest(
         goal_id="grow",
         likes=["fruit"],
@@ -122,11 +124,14 @@ async def test_recommendations_endpoint_returns_enriched_lists_and_queues_images
     monkeypatch.setattr(recommendations_router, "mark_pending", MagicMock())
     monkeypatch.setattr(recommendations_router, "generate_and_cache_food_image", MagicMock())
 
-    response = await recommendations_router.recommend(
-        payload=payload,
-        background_tasks=background_tasks,
-        current_user={"username": "demo"},
-    )
+    async def _run():
+        return await recommendations_router.recommend(
+            payload=payload,
+            background_tasks=background_tasks,
+            current_user={"username": "demo"},
+        )
+
+    response = asyncio.run(_run())
 
     assert len(response.super_power_foods) == 1
     assert response.super_power_foods[0].food_name == "Apple"
@@ -136,13 +141,12 @@ async def test_recommendations_endpoint_returns_enriched_lists_and_queues_images
     assert recommendations_router.mark_pending.call_count == 3
 
 
-@pytest.mark.asyncio
-async def test_recommendations_endpoint_rejects_invalid_model_output(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_recommendations_endpoint_rejects_invalid_model_output(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(recommendations_router, "call_model", MagicMock(return_value="raw"))
     monkeypatch.setattr(recommendations_router, "parse_model_output", MagicMock(return_value=None))
 
-    with pytest.raises(HTTPException) as exc_info:
-        await recommendations_router.recommend(
+    async def _run():
+        return await recommendations_router.recommend(
             payload=RecommendationRequest(
                 goal_id="grow",
                 likes=[],
@@ -153,5 +157,8 @@ async def test_recommendations_endpoint_rejects_invalid_model_output(monkeypatch
             background_tasks=BackgroundTasks(),
             current_user={"username": "demo"},
         )
+
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(_run())
 
     assert exc_info.value.status_code == 502

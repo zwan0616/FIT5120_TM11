@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import date
 from types import SimpleNamespace
 
@@ -47,35 +48,38 @@ class FakeDB:
         self.commits += 1
 
 
-@pytest.mark.asyncio
-async def test_status_reports_completed_today() -> None:
+def test_status_reports_completed_today() -> None:
     completion = SimpleNamespace(username="demo", completion_date=date.today())
     db = FakeDB(query_result=FakeQuery(first_result=completion))
 
-    response = await daily_router.check_challenge_status(
-        current_user={"username": "demo"},
-        db=db,
-    )
+    async def _run():
+        return await daily_router.check_challenge_status(
+            current_user={"username": "demo"},
+            db=db,
+        )
+
+    response = asyncio.run(_run())
 
     assert response.completed_today is True
     assert response.message == daily_router.COMPLETED_MESSAGE
 
 
-@pytest.mark.asyncio
-async def test_status_reports_not_completed() -> None:
+def test_status_reports_not_completed() -> None:
     db = FakeDB(query_result=FakeQuery(first_result=None))
 
-    response = await daily_router.check_challenge_status(
-        current_user={"username": "demo"},
-        db=db,
-    )
+    async def _run():
+        return await daily_router.check_challenge_status(
+            current_user={"username": "demo"},
+            db=db,
+        )
+
+    response = asyncio.run(_run())
 
     assert response.completed_today is False
     assert response.message is None
 
 
-@pytest.mark.asyncio
-async def test_next_challenge_excludes_requested_id(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_next_challenge_excludes_requested_id(monkeypatch: pytest.MonkeyPatch) -> None:
     task = SimpleNamespace(id=8, task_name="Drink water", tips="Have a glass of water")
     query = FakeQuery(first_result=task)
     captured = {}
@@ -86,41 +90,48 @@ async def test_next_challenge_excludes_requested_id(monkeypatch: pytest.MonkeyPa
 
     monkeypatch.setattr(daily_router, "_challenge_query", fake_challenge_query)
 
-    response = await daily_router.get_next_challenge(
-        exclude_id=5,
-        current_user={"username": "demo"},
-        db=FakeDB(),
-    )
+    async def _run():
+        return await daily_router.get_next_challenge(
+            exclude_id=5,
+            current_user={"username": "demo"},
+            db=FakeDB(),
+        )
+
+    response = asyncio.run(_run())
 
     assert captured["exclude_id"] == 5
     assert response.id == 8
     assert response.task_name == "Drink water"
 
 
-@pytest.mark.asyncio
-async def test_next_challenge_returns_404_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_next_challenge_returns_404_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(daily_router, "_challenge_query", lambda db, exclude_id=None: FakeQuery(first_result=None))
 
-    with pytest.raises(HTTPException) as exc_info:
-        await daily_router.get_next_challenge(
+    async def _run():
+        return await daily_router.get_next_challenge(
             exclude_id=None,
             current_user={"username": "demo"},
             db=FakeDB(),
         )
 
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(_run())
+
     assert exc_info.value.status_code == 404
 
 
-@pytest.mark.asyncio
-async def test_complete_challenge_records_first_completion() -> None:
+def test_complete_challenge_records_first_completion() -> None:
     task = SimpleNamespace(id=3, task_name="Eat vegetables", feedback="Nice work")
     db = FakeDB(query_result=FakeQuery(first_result=None), get_result=task)
 
-    response = await daily_router.complete_challenge(
-        payload=SimpleNamespace(id=3),
-        current_user={"username": "demo"},
-        db=db,
-    )
+    async def _run():
+        return await daily_router.complete_challenge(
+            payload=SimpleNamespace(id=3),
+            current_user={"username": "demo"},
+            db=db,
+        )
+
+    response = asyncio.run(_run())
 
     assert response.id == 3
     assert response.feedback == "Nice work"
@@ -128,17 +139,19 @@ async def test_complete_challenge_records_first_completion() -> None:
     assert db.commits == 1
 
 
-@pytest.mark.asyncio
-async def test_complete_challenge_skips_duplicate_write() -> None:
+def test_complete_challenge_skips_duplicate_write() -> None:
     task = SimpleNamespace(id=4, task_name="Wash hands", feedback="Great hygiene")
     existing = SimpleNamespace(username="demo", completion_date=date.today())
     db = FakeDB(query_result=FakeQuery(first_result=existing), get_result=task)
 
-    response = await daily_router.complete_challenge(
-        payload=SimpleNamespace(id=4),
-        current_user={"username": "demo"},
-        db=db,
-    )
+    async def _run():
+        return await daily_router.complete_challenge(
+            payload=SimpleNamespace(id=4),
+            current_user={"username": "demo"},
+            db=db,
+        )
+
+    response = asyncio.run(_run())
 
     assert response.id == 4
     assert response.task_name == "Wash hands"
